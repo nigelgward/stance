@@ -51,35 +51,34 @@ Done:
 - code to write raw (frame-level) features; just pass in 0 insted of mono4.fss  [4]
 - extend to handle Turkish annotations, and increase parsing robustness [8]
 - created a small regression test for English [1] 
-- saved results of large English test
+- saved results of large English test [2]
+- release on Github [2]
 
 Remaining:
+- create Mandarin ppm and test, to test workflow (Gerry) [4]
+- add code to support use of an Keras-trained neural network (Gerry) [8]
+
+- extend to handle LDC-style audio structure, on Uyghur [3]
+
 - record time, as a multiple of real time, for pitch computation, and knn
 - redo for Turkish, to fix paper [2]
   clean Turkish data ("warning very long" problem)
   kappas, presence-of-stance statistics,
   baseline performance, human performance, 
   number of segments, total minutes
-   ... Wednesday 
-
-- extend to handle LDC-style audio structure, on Uyghur [3]
-   ... Thursday
 
 - test performance on Uyghur stance   [3]
 - test whether cross-segment (broadcast-level) normalization helps [4] 
-
 
 - import comments from Jason's readme [1] 
 
 - extend to handle situation-type annotations, Appen-format [8]
 - redo last year's Uyghur experiments [10]
 
-- have Gerry test the workflow
-  - create Mandarin ppm and test [4]
-
 - second code review [2] 
-- clean up English corpus following english/to-reprocess/Readme and create a new ppm file [1] 
-- package it up, release on Github [1]
+- clean up English corpus following english/to-reprocess/Readme [2] 
+- create good ppm files for all and release [1] 
+
 - transfer to Dita for cross-language use [1]
 
 - add python wrappper with Ivan [2] 
