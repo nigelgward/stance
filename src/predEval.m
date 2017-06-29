@@ -10,13 +10,13 @@ function [predictions, MSE] =  predEval(aufileloc, annotationsDir, ppmfile)
   annotations = getAnnotations(annotationsDir);
   actual = concatenateTargets(annotations);
 
-  comparePropVals(predictions, actual, 'Predictions', true);
+  MSE = comparePropVals(predictions, actual, 'Predictions', true);
   comparePropVals(repmat(blvals, size(actual, 1), 1), actual, 'Baseline', false);  
 end
 
 
 %------------------------------------------------------------------
-function comparePropVals(predictions, actual, title, printAll)
+function MSE = comparePropVals(predictions, actual, title, printAll)
 
   if printAll
     printRows(actual, 'Annotations');
