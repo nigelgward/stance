@@ -6,34 +6,36 @@ Nigel Ward, UTEP, June 2017
 This file overviews the software components, and then lists what remains to be done 
 
 
-
 There are two top-level functions:
+   makePPM
+      - which creates a prosody-properties mapping file 
+   prosprop
+     - which uses a ppm file to classify a new input
 
-makePPM
-- which creates a prosody-properties mapping file 
-prosprop
-- which uses a ppm file to classify a new input
+And two driver functions: 
+   predEval
+   regressionTest
 
+Various important functions
+   nprosodizeCorpus
+     - is used by both to compute the prosodic features 
 
-prosodizeCorpus
-- is used by both to compute the prosodic features 
+   normalizeCorpus
+     - is used by prosprop, to normalize new segments using
+       means and standard deviations previously computed over
+       the training data
 
-normalizeCorpus
-- is used by prosprop, to normalize new segments using
-  means and standard deviations previously computed over
-  the training data
+   patchwiseKnn
+     - is the actual estimator, called by prosprop
 
-patchwiseKnn
-- is the actual estimator, called by prosprop
+   prepForKnn
+     - concatenates things in a prosodized corpus, for fast search etc.
 
-prepForKnn
-- concatenates things in a prosodized corpus, for fast search etc.
+   readStanceAnnotations
+     - reads a directory full of annotations
 
-readStanceAnnotations
-- reads a directory full of annotations
-
-readStanceSpreadsheet
-- reads on csv file 
+   readStanceSpreadsheet
+     - reads one csv file 
 
 
 Done:
@@ -49,16 +51,27 @@ Done:
    While worse that Jason's latest results, it's a different set of files
    (see comments in  english/to-reprocess/Readme.txt)
 - code to write raw (frame-level) features; just pass in 0 insted of mono4.fss  [4]
-- extend to handle Turkish annotations, and increase parsing robustness [8]
+- extend to handle Turkish or Uyghur annotations, and increase parsing robustness [8]
 - created a small regression test for English [1] 
 - saved results of large English test [2]
 - release on Github [2]
 
 Remaining:
+- test performance on Uyghur stance   [3]
+
 - create Mandarin ppm and test, to test workflow (Gerry) [4]
+
 - add code to support use of an Keras-trained neural network (Gerry) [8]
 
-- extend to handle LDC-style audio structure, on Uyghur [3]
+- extend to to situation-type inference, Uyghur first 
+  1. will need to handle LDC-style audio structure
+    after creating the concat00X.au files;
+    getSegInfo has code fragments for this this
+  2. will need to revive the parsing of annotations, 
+     both native-speaker judgments and Appen-style JSON files 
+
+- test whether cross-segment (broadcast-level) normalization helps [4] 
+- test whether mono4 and time helps
 
 - record time, as a multiple of real time, for pitch computation, and knn
 - redo for Turkish, to fix paper [2]
@@ -67,13 +80,7 @@ Remaining:
   baseline performance, human performance, 
   number of segments, total minutes
 
-- test performance on Uyghur stance   [3]
-- test whether cross-segment (broadcast-level) normalization helps [4] 
-
 - import comments from Jason's readme [1] 
-
-- extend to handle situation-type annotations, Appen-format [8]
-- redo last year's Uyghur experiments [10]
 
 - second code review [2] 
 - clean up English corpus following english/to-reprocess/Readme [2] 

@@ -78,10 +78,7 @@ function validCols = annotatedColumns(NStags)
     tag = char(NStags(tagnum));
     if (length(strfind(tag, 'Out of Domain')) > 0 || ...
 	length(strfind(tag, 'Domain')) > 0 || ...
-	length(strfind(tag, 'Out')) > 0 || ...
 	length(strfind(tag, 'domain')) > 0 || ...
-	length(strfind(tag, 'out')) > 0 )
-      %%fprintf('skipping column %d, with tag %s\n', column, tag);
       continue
     else
       nValid = nValid + 1;
@@ -94,6 +91,8 @@ end
 
 
 %%------------------------------------------------------------------
+%% !! needs code review; fails on some Mandarin files !!
+
 function [stanceVals, stancenames] = parseStanceVals(lines, columnsWithAnnotations)
   nValidLines = 0;
   maxProperties = 14; 
