@@ -17,7 +17,7 @@ function [propertyValues, propertyNames] = getAnnotations(annotationDir)
     end
     propertyValues = segStructs;
   else 
-    error('LDC corpus workflow not yet implemented\n');
+    error('get annotations: found no csv files, so assuming it is an LDC corpus, but that is not  yet implemented\n');
   end
 end
 

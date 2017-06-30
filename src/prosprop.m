@@ -65,6 +65,9 @@ function saveResults(propvals, propertyNames, jsonFlag)
 
   filePrefix = 'props';
   outdir = 'outputs';
+  if ~exist(outdir, 'dir')
+    mkdir (outdir);
+  end
   outfilebase = sprintf('%s/%s%s', outdir, filePrefix, datestr(now, 'mmmdd-HH-MM'));
   save([outfilebase '.mat'], 'propvals');
   if jsonFlag
@@ -93,8 +96,9 @@ end
       
 %----------------------------------------------------------------------------
 %% testing
-% matlab
-% addpath h:/nigel/midlevel/src/
-% addpath h:/nigel/lorelei/uteppp/src
-% cd h:/nigel/ppm
-% prosprop('testAudio', 'testAnnotations', 'testPPM/smalltest-ppm.mat', '');
+%%  matlab
+%%  addpath h:/nigel/midlevel/src/
+%%  addpath h:/nigel/stance/src
+%%  cd h:/nigel/stance/testeng
+%%  prosprop('audio', 'annotations', 'eng-mono4-testeng-ppm.mat', 'u', 100);
+%% or use regressionTest();

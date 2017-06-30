@@ -4,6 +4,15 @@ function [NSvals, NStags, starts, aufilebase, stancenames] = ...
   
   %% file format expected: CSV
   
+  %% The annotators give us excel files, which we convert to CSV as follows:
+  %% 1. open the excel file
+  %% 2. go to the Developer tab (if necessary, first do: file->options->customize ribbon)
+  %% 3. click "view code" in the middle of the ribbon
+  %% 4. Copy in the"lightweight VBA macro from http://superuser.com/questions/841398/how-to-convert-excel-file-with-multiple-sheets-to-a-set-of-csv-files
+  %%   saved locally as excel-to-csv-macro
+  %% 5. Click Run 
+
+
   %% English and Mandarin (from Speed of Sound)
   %% row 1: "Stance Annotation"
   %% row 2: informal description of audio file 
@@ -28,13 +37,6 @@ function [NSvals, NStags, starts, aufilebase, stancenames] = ...
   %% audio filename: for SOS row 3 tail of the URL; for Appen row 2, second column
   %% stancenames: all non-blank fields in first column of rows 6-21
 
-  %% In any case, the CSV files are generated from the excel annotation files as follows:
-  %% 1. open the excel file
-  %% 2. go to the Developer tab (if necessary, first do: file->options->customize ribbon)
-  %% 3. click "view code"
-  %% 4. Copy in the macro from http://superuser.com/questions/841398/how-to-convert-excel-file-with-multiple-sheets-to-a-set-of-csv-files
-  %%   saved locally as excel-to-csv-macro
-  %% 5. Click Run 
 
   fd = fopen(csvfilename, 'r');
   longstring = fileread(csvfilename);
@@ -60,17 +62,14 @@ function [NSvals, NStags, starts, aufilebase, stancenames] = ...
   starts = minsecToSec(parseTags(lines(lineOfStarts)));
 
   allTags = parseTags(lines(lineOfTags));  %  informal name OR situation type / out-of-domain
-  if isempty(allTags)
-    %% one annotator sometimes put the topic names on the starttimes line
-    error(' **no tag names found; probable file format error\n');
-  end  
   columns = annotatedColumns(allTags);
   NStags = allTags(columns-1);    % remove out-of-domain columns
   [NSvals, stancenames] = parseStanceVals(lines(6:21), columns);
 end
 
 %%------------------------------------------------------------------
-%% for Turkish, segments that were previously classified as "Out of Domain"
+%% for Turkish, segments that are "Out of Domain"
+%%   (as determined during a previos annotation effort)
 %% were not annotated for stance, so skip them
 function validCols = annotatedColumns(NStags)
   validColumns = zeros(1,length(NStags));
@@ -151,12 +150,17 @@ function present = containsAny(element, list)
    present = true; % stub
 end
 
-%------------------------------------------------------------------
-% converts a sequence like 1:03, 1:25 to [63, 85]
+%%------------------------------------------------------------------
+%% converts a sequence like 1:03, 1:25 to [63, 85]
+%% can handle mm:ss.dd and hh:mm:ss.dd
 function timesInSeconds = minsecToSec(stringvec)
   timesInSeconds = [];
   for nsi = 1:length(stringvec)
     timespec = char(stringvec(nsi));
+    numberOfColons = length(strfind(timespec, ':'));
+    if numberOfColons == 2
+      timespec = timespec(4:end);
+    end
     minsec = strread(timespec, '%s', 'delimiter', ':');
     timesInSeconds(end+1) = ...
 		     60 * str2num(char(minsec(1))) + str2num(char(minsec(2)));
@@ -175,5 +179,5 @@ end
 %------------------------------------------------------------------
 
 %% to test:
-%%   readSpreadsheet('testAnnotations/stance_ChevLocalNewsJuly3_L.csv', ' ');
+%%   readSpreadsheet('testeng/annotations/stance_ChevLocalNewsJuly3_L.csv');
 
