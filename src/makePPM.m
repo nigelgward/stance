@@ -18,7 +18,6 @@ function model = makePPM(audioDir, annotationloc, fssfile, ppmfilename)
   end
   prosodized = prosodizeCorpus(audioDir, annotationloc, featurespec, stride);
 
-  
   [means, stddevs] = computeNormalizationParams(prosodized);
   normalized = normalizeCorpus(prosodized, means, stddevs);
 

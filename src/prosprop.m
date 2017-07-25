@@ -33,7 +33,8 @@ function [propvals, baseline] = prosprop(audioDir, segInfoDir, ppmfile, stride, 
 
     segmentData = testNormalized{i}.features;
     if leaveOneOut
-      [patchFeatures, patchProperties] = prepForKnn(model, i, false);
+      indicesToExclude = [i];
+      [patchFeatures, patchProperties] = prepForKnn(model, indicesToExclude, false);
     end
     propvals(i,:) = patchwiseKnn(segmentData, patchFeatures, patchProperties, 3);
     %%    [propvals(i,:), votes] = patchwiseKnn(segmentData, patchFeatures, patchProperties, 3);

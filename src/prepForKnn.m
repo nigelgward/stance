@@ -3,7 +3,7 @@ function [featuresForAllPatches, propsForAllPatches] = prepForKnn(segData, exclu
   %% create two parallel matrices, of features and target values
   %%  for the first: concatenate all segments' patches then add temporals
   %%  for the second: repmat and conatenate properties for each segment
-  %% exclude is the number of a segment to exclude, if any (for leave-one-out testing
+  %% exclude is the number of a segment to exclude, if any (for leave-one-out testing)
   %% similar to Jason's buildRegTrainingData
   %% Nigel Ward and Ivan Gris, UTEP, June 2017
   %% see ../doc/UTEP-prosody-overview.docx
@@ -11,7 +11,7 @@ function [featuresForAllPatches, propsForAllPatches] = prepForKnn(segData, exclu
   featuresForAllPatches = concatenateFeatures(segData, exclude);
   nPatchesSoFar = 0;  
   for i = 1:length(segData)
-    if i == exclude
+    if ismember(i, exclude)
       continue
     end
     segment = segData{i};

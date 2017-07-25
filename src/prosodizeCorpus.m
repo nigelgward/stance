@@ -1,4 +1,4 @@
-function prosodized = prosodizeCorpus(audioDir, annotDir, featurespec, stride)
+function segData = prosodizeCorpus(audioDir, annotDir, featurespec, stride)
 
   %% Nigel Ward, UTEP, June 2017
   %% creates a nice data structure representing the prosodic information etc.
@@ -30,8 +30,9 @@ function prosodized = prosodizeCorpus(audioDir, annotDir, featurespec, stride)
     segData{i}.broadcastName = aufiles{i};
     segData{i}.properties = [];    % empty, possibly added later
   end
-  prosodized = segData;
 end
+  
+  
 
 
 

@@ -3,7 +3,10 @@ see also ../doc/UTEP-prosody-overview.doc
 
 Nigel Ward, UTEP, June 2017
 
-This file overviews the software components, and then lists what remains to be done 
+This file
+- overviews the software components
+- describes the three training/testing scenarios
+- lists what remains to be done 
 
 
 There are two top-level functions:
@@ -37,6 +40,17 @@ Various important functions
    readStanceSpreadsheet
      - reads one csv file 
 
+There are three training/testing scenarios:
+  1. Training data and test data are in separate directories.
+     This is the main use case, and what the customers will use.
+  2. Test data is each file in turn; training is all the rest.
+     (Leave one out).  This is for experimentation and tuning, mostly 
+     because the stance-annotated data is quite small.  This is done
+     in prosprop if the leaveOneOut flag is true.
+  3. Pseudo-Random splits.  This is required because training 900
+     neural nets takes too long.  So we use as test data every 10th
+     broadcast, and use as training data all the rest.  This is also done
+     in prosprop (not yet implemented).
 
 Done:
 - basic framework [24]
@@ -55,48 +69,69 @@ Done:
 - created a small regression test for English [1] 
 - saved results of large English test [2]
 - release on Github [2]
-
-Remaining:
-- test performance on Uyghur stance   [3]
-
-- create Mandarin ppm and test, to test workflow (Gerry) [4]
-
+- created Mandarin ppm and tested, to test workflow (Gerry) [4]
 - add code to support use of an Keras-trained neural network (Gerry) [8]
 
-- extend to to situation-type inference, Uyghur first 
+Critical Path:
+- test performance on Uyghur stance (Gerry) [3]
+- and test Uyghur trained on Turkish (Gerry) [3]
+
+- determine the best hidden-layer size for small data,
+  for now the Uyghur; later the suprise languages (Gerry) [8]
+
+- prep to handle August data
+  - code review on Dita's annotation format [1]
+
+- August evaluation [4]
+- prepare Interspeech talk [8]  (NW)
+
+
+Nice to have for August eval 
+
+- merge in Gerry's changes to parse Uyghur
+- Gerry makes modifications to handle 80:20 and 90:10 data splits
+- merge in modifications to the main codebase
+
+- import comments from Jason's readme [1]   (NW)
+
+- extend to do situation-type inference, Uyghur first  (NW)
   1. will need to handle LDC-style audio structure
     after creating the concat00X.au files;
-    getSegInfo has code fragments for this this
-  2. will need to revive the parsing of annotations, 
+    getSegInfo has code fragments for this 
+  2. will need to revive the parsing of annotations, (NW and Dita)
      both native-speaker judgments and Appen-style JSON files 
+- test whether cross-segment (broadcast-level) normalization helps [4] (NW)
+- test whether mono4 and time helps (NW or Dita)
 
-- test whether cross-segment (broadcast-level) normalization helps [4] 
-- test whether mono4 and time helps
 
-- record time, as a multiple of real time, for pitch computation, and knn
-- redo for Turkish, to fix paper [2]
+Other August Tasks
+
+- add comments to Keras code, test, and release (Gerry) [4]
+  and release Matlab with option to dump to .mat file for this
+
+- measure time cost, as a multiple of real time, for pitch
+  computation, and knn   (NW)
+
+- find a faster pitch tracker (and test quality)  (GC or AN)
+
+- redo for Turkish, to fix paper [2]     (NW) 
   clean Turkish data ("warning very long" problem)
   kappas, presence-of-stance statistics,
   baseline performance, human performance, 
   number of segments, total minutes
 
-- import comments from Jason's readme [1] 
+September
 
-- second code review [2] 
-- clean up English corpus following english/to-reprocess/Readme [2] 
-- create good ppm files for all and release [1] 
+- fix the NaNs (this is not hurting kNN; also not NN training since
+  such patches are stripped out)    (someone)
 
-- transfer to Dita for cross-language use [1]
+- clean up English corpus following English/to-reprocess/Readme [2] (NW - September)
+- create good ppm files for all languages and release [1]  (NW - September)
+- debug the NaNs for music    (NW or GC - September)
 
-- add python wrappper with Ivan [2] 
-- tranfer to Tina, NCC, USC [3]
+- transfer to Dita for cross-language use [1] (NW - September)
 
-- prep to handle August data, w/ Dita (normalization; native-speaker judgments)
-
-- write quarterly 9 [6]
-- write request for 2 years funding [6]
-
-- August evaluation [4]
-- prepare interspeech talk [8]
+- add python wrappper with Ivan [2] (IG - September)
+- tranfer to Tina, NCC, USC [3]  (IG - September)
 
 
