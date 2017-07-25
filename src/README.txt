@@ -92,8 +92,6 @@ Nice to have for August eval
 - Gerry makes modifications to handle 80:20 and 90:10 data splits
 - merge in modifications to the main codebase
 
-- import comments from Jason's readme [1]   (NW)
-
 - extend to do situation-type inference, Uyghur first  (NW)
   1. will need to handle LDC-style audio structure
     after creating the concat00X.au files;

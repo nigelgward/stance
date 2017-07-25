@@ -8,7 +8,8 @@ function results = regressionTest()
   %%   predictions = regressionTest()
   %%   save('small-results', 'predictions')
   
-  [results, MSE]=  predEval('audio', 'annotations', 'eng-mono4-testeng-ppm.mat');  
+  [results, MSE]=  predEval('audio', 'annotations', 'eng-mono4-testeng-ppm.mat');
+%  [results, MSE]=  predEval('audio', 'annotations', 'testoutput-ppm.mat');  
   load ('small-results', 'predictions');
   
   permissibleError = 0.1;  % on a scale from 0 to 2

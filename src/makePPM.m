@@ -22,7 +22,6 @@ function model = makePPM(audioDir, annotationloc, fssfile, ppmfilename)
   normalized = normalizeCorpus(prosodized, means, stddevs);
 
   [propValues, propertyNames] = getAnnotations(annotationloc);
-  fprintf('size(propValues) = %d %d\n', size(propValues));
 
   model = mergeInPropValues(normalized, propValues);
 
@@ -44,11 +43,9 @@ end
 %------------------------------------------------------------------
 function merged = mergeInPropValues(featuresPlus, propertyValues);
   nsegments = size(featuresPlus, 1);
-  fprintf('in merge: size(property values) is %d, %d\n', size(propertyValues));
   if size(propertyValues,1) ~= nsegments
     error('size mismatch between audio files and annotations');
   end
-  fprintf('in merge, nsegments = %d\n', nsegments);
   for i = 1:nsegments
     featuresPlus{i}.properties = propertyValues{i}.properties;
   end
@@ -58,6 +55,6 @@ end
 
 %------------------------------------------------------------------
 %% sample call:
-%%  cd nigel/ppm
-%%  makePPM('testAudio', 'testAnnotations', 'src/mono4.fss', 'testPPM/smalltest-ppm.mat', 100);
+%%  cd nigel/stance/testeng
+%%  makePPM('audio', 'annotations', '../src/mono4.fss', 'smalltest-ppm.mat');
 

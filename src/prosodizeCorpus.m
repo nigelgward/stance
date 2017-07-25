@@ -24,6 +24,10 @@ function segData = prosodizeCorpus(audioDir, annotDir, featurespec, stride)
   for i = 1:nsegments
     segfeatures = featuresForSegment(aufiles{i}, starts(i), ends(i), ...
 				     featurespec, audioDir, stride);
+    %% Converting to single saves diskspace for ppmfiles, maybe time too,
+    %%   and gives the same answers, but it causes annoying warnings
+    %%   when running knnsearch, so for now we don't do it
+    %% segfeatures = single(segfeatures);    
     segData{i}.features = addTemporalFeatures(segfeatures, stride);  
     segData{i}.startTime = starts(i);
     segData{i}.endtTime = ends(i);
@@ -32,9 +36,6 @@ function segData = prosodizeCorpus(audioDir, annotDir, featurespec, stride)
   end
 end
   
-  
-
-
 
 %----------------------------------------------------------------------------
 %% input: matrix of features, one every 100 ms
