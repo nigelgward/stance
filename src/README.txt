@@ -101,6 +101,8 @@ Nice to have for August eval
 - test whether cross-segment (broadcast-level) normalization helps [4] (NW)
 - test whether mono4 and time helps (NW or Dita)
 
+- add code to automatically assign zeros to nonspeech data, as inferred
+  by 
 
 Other August Tasks
 
