@@ -21,7 +21,7 @@ And two driver functions:
 
 Various important functions
    nprosodizeCorpus
-     - is used by both to compute the prosodic features 
+     - computes the prosodic features; is used by both top-level functions 
 
    normalizeCorpus
      - is used by prosprop, to normalize new segments using
@@ -71,67 +71,35 @@ Done:
 - release on Github [2]
 - created Mandarin ppm and tested, to test workflow (Gerry) [4]
 - add code to support use of an Keras-trained neural network (Gerry) [8]
+- extended to test performance on Uyghur, by Gerry; very poor results;
+  perhaps due to annotation quality
+- extended to handle LDC-format data and tasks by Dita and Alfonso
+  (but that code is not merged into this)
+- coverted to python and shared with Tina etc.
+- did cross-language experiments (Dita)
 
-Critical Path:
-- test performance on Uyghur stance (Gerry) [3]
-- and test Uyghur trained on Turkish (Gerry) [3]
+Things to Do: 
 
-- determine the best hidden-layer size for small data,
-  for now the Uyghur; later the suprise languages (Gerry) [8]
-
-- prep to handle August data
-  - code review on Dita's annotation format [1]
-
-- August evaluation [4]
-- prepare Interspeech talk [8]  (NW)
-
-
-Nice to have for August eval 
-
-- merge in Gerry's changes to parse Uyghur
-- Gerry makes modifications to handle 80:20 and 90:10 data splits
-- merge in modifications to the main codebase
-
-- extend to do situation-type inference, Uyghur first  (NW)
+- extend to do situation-frame properties
   1. will need to handle LDC-style audio structure
     after creating the concat00X.au files;
-    getSegInfo has code fragments for this 
-  2. will need to revive the parsing of annotations, (NW and Dita)
-     both native-speaker judgments and Appen-style JSON files 
+  2. will need to parse the annotations ...
+     there is code for this in ../../sframes/readSFannotations.m
 - test whether cross-segment (broadcast-level) normalization helps [4] (NW)
 - test whether mono4 and time helps (NW or Dita)
 
-- add code to automatically assign zeros to nonspeech data, as inferred
-  by 
-
-Other August Tasks
-
-- add comments to Keras code, test, and release (Gerry) [4]
-  and release Matlab with option to dump to .mat file for this
+- add code to automatically assign zeros to nonspeech data, as inferred somehow
 
 - measure time cost, as a multiple of real time, for pitch
   computation, and knn   (NW)
 
 - find a faster pitch tracker (and test quality)  (GC or AN)
 
-- redo for Turkish, to fix paper [2]     (NW) 
-  clean Turkish data ("warning very long" problem)
-  kappas, presence-of-stance statistics,
-  baseline performance, human performance, 
-  number of segments, total minutes
-
-September
-
 - fix the NaNs (this is not hurting kNN; also not NN training since
   such patches are stripped out)    (someone)
 
 - clean up English corpus following English/to-reprocess/Readme [2] (NW - September)
-- create good ppm files for all languages and release [1]  (NW - September)
-- debug the NaNs for music    (NW or GC - September)
 
-- transfer to Dita for cross-language use [1] (NW - September)
 
-- add python wrappper with Ivan [2] (IG - September)
-- tranfer to Tina, NCC, USC [3]  (IG - September)
 
 

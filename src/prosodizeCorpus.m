@@ -1,8 +1,8 @@
 function segData = prosodizeCorpus(audioDir, annotDir, featurespec, stride)
 
   %% Nigel Ward, UTEP, June 2017
-  %% creates a nice data structure representing the prosodic information etc.
-  %% This data structure is the 
+  %% returns a data structure representing prosodic information etc.
+
   %% inputs: audioDir, varies in format, UTEP or LDC
   %%         annotDir, ditto.  this function uses this only for 
   %%            the news-segment boundaries, and for UTEP-format audio 
@@ -10,9 +10,8 @@ function segData = prosodizeCorpus(audioDir, annotDir, featurespec, stride)
   %%         stride: time between patches, in milliseconds
   %% output: prosodized is cell array of structures
   %%       this is segmentData format, see ../doc/UTEP-prosody-overview.docx
-  %%       This function does not add props (annotation info); 
-  % %        since that is added later if needed.
-  %%       Notice also that the output is not z-normalized; that's done later
+  %%       NB: props (annotation info) is added later if needed
+  %%       NB: z-normalization is done later, by normalizeCorpus
   %% test with x = prosodizeCorpus('testAudio', 'testAnnotations', ...
   %%      getfeaturespec('src/mono4.fss');
   %%   and then examine x{1}, x{2}, etc.
@@ -32,12 +31,12 @@ function segData = prosodizeCorpus(audioDir, annotDir, featurespec, stride)
     segData{i}.startTime = starts(i);
     segData{i}.endtTime = ends(i);
     segData{i}.broadcastName = aufiles{i};
-    segData{i}.properties = [];    % empty, possibly added later
+    segData{i}.properties = [];    % empty, may be added later
   end
 end
   
 
-%----------------------------------------------------------------------------
+%-------------------------------------------------------------------------
 %% input: matrix of features, one every 100 ms
 %% output: same, plus two new columns for temporal features
 %% this function replaces Jason's addTimeFeatures

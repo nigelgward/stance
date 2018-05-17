@@ -7,7 +7,7 @@ function [predictions, MSE] =  predEval(aufileloc, annotationsDir, ppmfile)
   %% predictions = prosprop(aufileloc, annotationsDir, ppmfile, 10, '');
   [predictions, blvals] = prosprop(aufileloc, annotationsDir, ppmfile, 100, 'l');
 
-  annotations = getAnnotations(annotationsDir);
+  [annotations, ~] = getAnnotations(aufileloc, annotationsDir); 
   actual = concatenateTargets(annotations);
 
   MSE = comparePropVals(predictions, actual, 'Predictions', true);
@@ -52,11 +52,11 @@ end
 %------------------------------------------------------------------
 function actual = concatenateTargets(annotations)
   nsegments = length(annotations);
-  nproperties = length(annotations{1}.properties);
+  nproperties = length(annotations{1}.props);
 
   actual = zeros(nsegments, nproperties);
   for i = 1:nsegments
-    actual(i,:) = annotations{i}.properties;
+    actual(i,:) = annotations{i}.props;
   end
 end
 

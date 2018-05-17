@@ -20,6 +20,7 @@ function [featuresForAllPatches, propsForAllPatches] = prepForKnn(segData, exclu
     firstRow = nPatchesSoFar + 1;
     lastRow = nPatchesSoFar + nPatchesInSegment;
     repeatedProperties = repmat(segment.properties, nPatchesInSegment, 1);
+
     propsForAllPatches(firstRow:lastRow, :) = repeatedProperties;
     nPatchesSoFar = lastRow;
   end

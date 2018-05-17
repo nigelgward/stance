@@ -1,5 +1,7 @@
 %% Nigel Ward, UTEP, June 2017
 
+%% for each segment in the corpus, z-normalize each prosodic feature
+
 function corpus = normalizeCorpus(corpus, means, stddevs)
   for i = 1:length(corpus)
     segment = corpus{i};

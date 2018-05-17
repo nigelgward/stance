@@ -101,5 +101,10 @@ end
 %%  addpath h:/nigel/midlevel/src/
 %%  addpath h:/nigel/stance/src
 %%  cd h:/nigel/stance/testeng
-%%  prosprop('audio', 'annotations', 'eng-mono4-testeng-ppm.mat', 'u', 100);
+%%  prosprop('audio', 'annotations', 'eng-mono4-testeng-ppm.mat', 100, 'u');
 %% or use regressionTest();
+
+%% or 
+%%   cd nigel/sframes/
+%%   prosprp('audio-testdir', 'annot-testdir', 'sftest.ppm', 100, '');
+

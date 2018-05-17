@@ -1,3 +1,4 @@
+%% returns a cell array of filenames
 function filenames = filesWithExtension(dirname, extension)
   filenames = {};
   files = dir(dirname);
