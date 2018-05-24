@@ -1,0 +1,10 @@
+Sub exportcsv()
+Dim ws As Worksheet
+Dim path As String
+
+path = ActiveWorkbook.path & "\" & Left(ActiveWorkbook.Name, InStr(ActiveWorkbook.Name, ".") - 1)
+For Each ws In Worksheets
+    ws.Activate
+    ActiveWorkbook.SaveAs Filename:=path & "_" & ws.Name & ".csv", FileFormat:=xlCSV, CreateBackup:=False
+Next
+End Sub
