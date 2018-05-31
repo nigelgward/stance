@@ -1,16 +1,23 @@
-function testLinearModel(features, target, string) 
-  fprintf('testLinearModel for %s\n', string);
+
+
+function [deltacorr, pranuc] = testLinearModel(features, target, string) 
   model = fitlm(features, target);
   preds = predict(model, features);
-  randomPreds = rand(size(preds));
-  niceStats(preds, target, 'linear regression');
-  niceStats(randomPreds, target, 'random');
+  [deltacorr, pranuc] = niceStats(preds, target, ['linear reg ' string]);
 end
 
 	  
-function niceStats(preds, target, string)
+
+function [deltaCorr, pranuc] = niceStats(preds, target, string)
   corr = corrcoef(horzcat(preds, target));
-  fprintf(' for %s: prediction correlations %6.3f   \n', string, corr(1,2));
-  a = auc(preds, target);
-  fprintf(' for %s: auc %6.3f   \n', string, a);
+  randomPreds = rand(size(preds));
+  randomCorr = corrcoef(horzcat(randomPreds, target));
+  deltaCorr = corr(1,2) - randomCorr(1,2);
+
+  a = prAuc(preds, target);
+  randomA = mean(target);
+  %% pranuc = percent reduction in area not under the curve, vs baseline
+  pranuc = 1 - ((1-a) / (1.0-randomA));  
+
+  fprintf(' for %37s: deltaCorr %5.3f, pranuc %5.3f   \n', string, deltaCorr, pranuc);
 end
