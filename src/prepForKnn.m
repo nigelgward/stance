@@ -9,6 +9,14 @@ function [featuresForAllPatches, propsForAllPatches] = prepForKnn(segData, exclu
   %% see ../doc/UTEP-prosody-overview.docx
   
   featuresForAllPatches = concatenateFeatures(segData, exclude);
+
+  firstSegment = segData{1};
+  nprops = size(firstSegment.properties,2);
+  nTotalPatches = computeNtotalPatches(segData, exclude);
+  %% pre-allocate what we need; important for speed
+  propsForAllPatches = zeros(nTotalPatches, nprops);   
+
+  %% this resembles concatenateFeatures; so may wish to refactor for elegance
   nPatchesSoFar = 0;  
   for i = 1:length(segData)
     if ismember(i, exclude)
@@ -25,7 +33,7 @@ function [featuresForAllPatches, propsForAllPatches] = prepForKnn(segData, exclu
     nPatchesSoFar = lastRow;
   end
   if showStats
-    fprintf(' prepForKnn: %d segments, %d patches, %.1f seconds, %.1f minutes\n', ...
+    fprintf(' prepForKnn: %d segments, %d patches, %.1f seconds, %.1f minutes of data\n', ...
 	    length(segData), nPatchesSoFar, nPatchesSoFar / 10, nPatchesSoFar / 600);
   end
 end

@@ -3,7 +3,7 @@ function data = getAudioMetadata(audir)
   filespec = sprintf('%s/*au', audir);
   aufiles = dir(filespec);
   if (size(aufiles,1) == 0)
-    error('no au files in the specified directory, "%s"\n', filespec);
+    error('no au files in the specified directory, "%s"\n', audir);
   end
   nfiles = length(aufiles);
   nproperties = 2;  % for now, just file length and loc in broadcast

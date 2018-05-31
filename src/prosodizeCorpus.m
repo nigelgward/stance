@@ -65,6 +65,8 @@ function features = featuresForSegment(aufile, startTime, endTime, ...
   segmentFrames = monster(startFrame:endFrame,:);
   downsamplingRate = stride / 10;
   features = segmentFrames(1:downsamplingRate:end, :);          
+    earlySegSize = min(50, size(features, 1)); % first 5 seconds 
+    features = features(1:earlySegSize,:);   % temporary!!!
 end
 
 

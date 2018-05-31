@@ -1,6 +1,12 @@
 function allpatches = concatenateFeatures(segInfo, exclude)
-  nPatchesSoFar = 0;
 
+  firstSegment = segInfo{1};
+  nfeatures = size(firstSegment.features,2);
+  nTotalPatches = computeNtotalPatches(segInfo, exclude);
+  %% pre-allocate what we need; important for speed in the leave-one-out case
+  allpatches = zeros(nTotalPatches, nfeatures);   
+
+  nPatchesSoFar = 0;
   for i = 1:length(segInfo)
     if i == exclude
       continue

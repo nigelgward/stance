@@ -25,21 +25,6 @@ function sfCorrelationsPlus(props, presence)
   testLinearModel(props, gravityVec, 'predicting gravity from broadcast, loc & len');
 end
 
-
-function testLinearModel(features, target, string) 
-  model = fitlm(features, target)
-  preds = predict(model, features);
-  randomPreds = rand(size(preds));
-  niceStats(preds, target, 'linear regression');
-  niceStats(randomPreds, target, 'random');
-end
-		  
-function niceStats(preds, target, string)
-  corr = corrcoef(horzcat(preds, target));
-  fprintf(' for %s: prediction correlations %6.3f   \n', string, corr(1,2));
-  a = auc(preds, target);
-  fprintf(' for %s: auc %6.3f   \n', string, a);
-end
 		  
 function showCorrelations(predictiveVar, actual)
   predvec = predictiveVar ./ max(predictiveVar);
@@ -55,7 +40,7 @@ function evaluatePredictions(guesses, actual)
     p = guesses(:,i);
     a = actual(:,i);
     corr = corrcoef(horzcat(p,a));
-    fprintf(' field %2d: %5.2f  %s \n', i, corr(1,2), fieldName(i));
+    fprintf(' field %2d: %5.2f  %s \n', i, corr(1,2), sfFieldName(i));
     %% scatter(a,p);
     %% input('show next graph');
   end
@@ -63,12 +48,3 @@ function evaluatePredictions(guesses, actual)
   %% evaluate them also with AUC
 end   
 
-
-function fieldString = fieldName(i,fieldStdNames)
-  [fieldStdNames, typeStdNames] = sfNamings();
-  if i <= length(fieldStdNames)
-    fieldString = fieldStdNames(i);
-  else
-    fieldString = typeStdNames(i-6);
-  end
-end

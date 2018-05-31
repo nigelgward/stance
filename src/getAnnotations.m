@@ -7,7 +7,7 @@ function [propertyValues, propertyNames] = getAnnotations(audioDir, annotDir)
 
   csvfiles = filesWithExtension(annotDir, 'csv');
   if (length(csvfiles) > 0)
-    %% then it's UTEP format 
+    %% then it's UTEP format annotations for the stance experiments 
     [vals, ~, segStarts, ~, segUrls, propertyNames] = readStanceAnnotations([annotDir '/']);
     nsegments = size(segStarts,2);
     segStructs = cell(nsegments,1);
@@ -18,11 +18,12 @@ function [propertyValues, propertyNames] = getAnnotations(audioDir, annotDir)
       segStructs{i}.broadcast = segUrls(i);
     end
   else
+    %% then we're looking at situation-frame annotations 
     [presence, propertyNames] = readSFannotations(annotDir);
     [starts, ends, aufilenames] = getSegInfo(audioDir, annotDir);
     nsegments = size(presence, 1);
     if nsegments ~= size(starts, 2);
-      error('getAnnotations, size mismatch: %d %d', nsegments, size(starts, 1));
+      error('getAnnotations, size mismatch: %d %d', nsegments, size(starts, 2));
     end
     segStructs = cell(nsegments,1);
     for i = 1:nsegments

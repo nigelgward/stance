@@ -1,4 +1,4 @@
-function [propvals, baseline] = prosprop(audioDir, segInfoDir, ppmfile, stride, flags)
+function [propvals, baseline, propertyNames] = prosprop(audioDir, segInfoDir, ppmfile, stride, flags)
 	   
   %% Nigel Ward and Ivan Gris, UTEP, June 2017
   %% see ../doc/UTEP-prosody-overview.docx
@@ -17,10 +17,12 @@ function [propvals, baseline] = prosprop(audioDir, segInfoDir, ppmfile, stride, 
   
   fprintf(' processing ''%s'' with respect to %s (%s)\n', ...
 	audioDir, ppmfile, provenance);
-  testProsodized = prosodizeCorpus(audioDir, segInfoDir, featurespec, 100);
+  testProsodized = prosodizeCorpus(audioDir, segInfoDir, featurespec, stride);
   testNormalized = normalizeCorpus(testProsodized, means, stddevs);
 
   [patchFeatures, patchProperties] = prepForKnn(model, 0, true);
+  examineNeighbors(stride, patchFeatures);
+
   baseline = mean(patchProperties);  % means over training data
   
   nproperties = length(propertyNames);
@@ -45,7 +47,7 @@ function [propvals, baseline] = prosprop(audioDir, segInfoDir, ppmfile, stride, 
   end
   fprintf('\n');
 
-  saveResults(propvals, propertyNames, writeJson);
+  %%saveResults(propvals, propertyNames, writeJson);
 end
   
 

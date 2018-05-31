@@ -101,18 +101,22 @@ end
 function [presence, locCount, typeCount] = recordPresence(filei, fieldID, lineString, lineCells, filename, presence, locCount, typeCount, nNonTypeFields)
   %% mapping from annotation strings to numeric values
   %%        these values are chosen so that 1 is what we need to find
-  %%        and 0 is the opposite, with some intermediate values
+  %%        and 0 is the opposite, 
+  %%        possibly with intermediate values, to use for training, not test
   %% different corpora have different sets of annotation options;
   %%  for now, just handle what's there for the English corpus
   statusMapping = containers.Map( ...
       {'Current', 'Future', 'Past', 'n/a'}, ...
-      {1, .2, .1, 0} );
+      [1, 0, 0, 0]);
+      %%      {1, .2, .1, 0} );
   reliefMapping = containers.Map( ...
       {'n/a', 'Insufficient/Unknown', 'No_Known_Resolution', 'Sufficient'}, ...
-      {.1, 1, .9, 0} );
+      {1, 1, 1, 0} );
+      %%       {.1, 1, .9, 0} );
   urgencyMapping = containers.Map( ...
       {'Urgent', 'Unknown', 'Not', 'n/a'}, ...
-      {1, 0.2, 0, 0} );
+      {1, 0, 0, 0} );
+      %%{1, 0.2, 0, 0} );
   %% hackish since type "Utilities, Energy, or Sanitation" has embedded commas
   typeIDs = containers.Map({'Evacuation', ...
 			    'Food Supply', ...

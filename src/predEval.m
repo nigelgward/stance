@@ -1,36 +1,72 @@
-function [predictions, MSE] =  predEval(aufileloc, annotationsDir, ppmfile)
+function [predictions, MSEs] =  predEval(aufileloc, annotationsDir, ppmfile)
  
   %% Nigel Ward, UTEP, June 2017
   %% see ../doc/UTEP-prosody-overview.docx
   %% called from the top level, to predict and then evaluate the predictions
 
-  %% predictions = prosprop(aufileloc, annotationsDir, ppmfile, 10, '');
-  [predictions, blvals] = prosprop(aufileloc, annotationsDir, ppmfile, 100, 'l');
+  [predictions, blvals, propertyNames] = prosprop(aufileloc, annotationsDir, ppmfile, 100, 'l'); % every 100 ms is reasonable
+%%    [predictions, blvals, propertyNames] = prosprop(aufileloc, annotationsDir, ppmfile, 200,''); % without the -l flag this is a cheating experiment if the test=train
+  save('resultsForRegTest', 'predictions');    % for regression testing 
 
   [annotations, ~] = getAnnotations(aufileloc, annotationsDir); 
   actual = concatenateTargets(annotations);
+  baselinePreds = repmat(blvals, size(actual, 1), 1);
+  %% for MSE eval dithering is not necessary, but for AUC it is 
+  %% varies greatly, in terms of the AUC this gives, from run to run
+  baselinePreds = baselinePreds + 0.1 * (rand(size(baselinePreds))-.5);
 
-  MSE = comparePropVals(predictions, actual, 'Predictions', true);
-  comparePropVals(repmat(blvals, size(actual, 1), 1), actual, 'Baseline', false);  
+  printRows(actual, 'actual');
+  printRows(predictions, 'predictions');
+
+  if allBoolean(actual)
+    AUCs = computeAUCs(predictions, actual, propertyNames);
+    baselineAUCs = computeAUCs(baselinePreds, actual, propertyNames);
+    showResultQuality(propertyNames, AUCs, baselineAUCs, 'AUC');
+  else
+    MSEs = computeMSEs(predictions, actual);
+    baselineMSEs = computeMSEs(baselinePreds, actual);  
+    showResultQuality(propertyNames, MSEs, baselineMSEs, 'MSE');
+  end
+end
+
+function isBoolean = allBoolean(matrix)
+  countOfZerosAndOnes = sum(sum(matrix==0)) + sum(sum(matrix==1));
+  numberOfElements = size(matrix, 1) * size(matrix, 2);
+  isBoolean = (countOfZerosAndOnes == numberOfElements);
 end
 
 
-%------------------------------------------------------------------
-function MSE = comparePropVals(predictions, actual, title, printAll)
 
-  if printAll
-    printRows(actual, 'Annotations');
-    printRows(predictions, title);
-  end 
-
+function MSEs = computeMSEs(predictions, actual);
   difference = actual - predictions;
-  MSE = mean(difference .* difference);
-  
-  fprintf('\n');
-  printRow(sprintf('MSE for %s', title), MSE);
-  fprintf('overall MSE is %.2f\n', mean(MSE));
-  save('small-results', 'predictions');    % for regression testing 
+  MSEs = mean(difference .* difference);
 end
+
+
+function aucs = computeAUCs(preds, actual, propertyNames)
+  aucs = zeros(1, length(propertyNames));
+  for i = 1:length(propertyNames)
+    predSlice = preds(:,i);
+    actualSlice = actual(:,i);
+    actualSlice(actualSlice < 1) = 0;
+    areaUnderTheCurve = prAuc(predSlice, actualSlice);  % formerly auc()
+    aucs(i) = areaUnderTheCurve;
+  end
+end
+
+
+function showResultQuality(propertyNames, vals, baselineVals, metric)
+  fprintf(' %s: preds, baseline\n', metric);
+  for i = 1:length(propertyNames) 
+    fprintf('%2d %14s  ', i, propertyNames{i});
+    fprintf(' %.3f  %.3f\n', vals(i), baselineVals(i));
+  end
+  valMean = mean(vals(~isnan(vals)));
+  bvalMean = mean(baselineVals(~isnan(baselineVals)));
+  fprintf('Overall %s: %.3f %.3f\n', metric, valMean, bvalMean);
+end
+
+
 
 %------------------------------------------------------------------
   function printRows(matrix, title)
