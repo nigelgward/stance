@@ -2,8 +2,10 @@
 
 %% nigel/sframes/sfdriver.m
 
+%%  for situation frame inference 
 %%  used for testing readSFAnnotations,
-%%  and for computing correlations and other stats
+%%  and for computing correlations between various properties
+%%  and for evaluating predictive models, in testset=trainingset evaluations
 
 %% testing
 %%   cd sframes
@@ -17,51 +19,45 @@ function sfdriver(audir, andir)
   nPredictables = size(presence, 2);
 
   metaDataProps = getAudioMetadata(audir);
-  %sfCorrelationsPlus(metaDataProps, presence);
-  [mdq, mpq] = testPredictability(metaDataProps, presence, 'metadata');   
+  sfCorrelationsPlus(metaDataProps, presence);
+  [mcq, mpq] = testPredictability(metaDataProps, presence, 'metadata');   
 
   pfaProps = getProsodicFeatureAverages(audir);
-  %showSomeCorrelations(pfaProps, presence);
-  [adq, apq] = testPredictability(pfaProps, presence, 'pros.f.avgs');   
+  showSomeCorrelations(pfaProps, presence);
+  [acq, apq] = testPredictability(pfaProps, presence, 'pros.f.avgs');   
 
   allProps = [metaDataProps pfaProps]; 
-  [bdq, bpq] = testPredictability(allProps, presence, 'both sets');   
+  [bcq, bpq] = testPredictability(allProps, presence, 'both sets');   
 
-  fprintf('              ----deltaCorr----    -----pranuc-----\n');
+  fprintf('              ---correlation---    -----pranuc-----\n');
   fprintf('                meta  pfa  both    meta  pfa  both\n');
   for i=1:nPredictables
     fprintf('%13s %5.2f %5.2f %5.2f   %5.2f %5.2f %5.2f\n', ...
-	    sfFieldName(i), mdq(i), adq(i), bdq(i), mpq(i), apq(i), bpq(i));
+	    sfFieldName(i), mcq(i), acq(i), bcq(i), mpq(i), apq(i), bpq(i));
   end
     fprintf('%13s %5.2f %5.2f %5.2f   %5.2f %5.2f %5.2f\n', ...
-	    'AVERAGES', mean(mdq), mean(adq), mean(bdq), mean(mpq), mean(apq), mean(bpq));
+	    'AVERAGES', mean(mcq), mean(acq), mean(bcq), mean(mpq), mean(apq), mean(bpq));
 end
 
 
-function [dcQuality, pranucQuality] = testPredictability(props, presence, modelType)
+function [corrQuality, pranucQuality] = testPredictability(props, presence, modelType)
   nPredictables = size(presence, 2);
-  dcQuality = zeros(nPredictables, 1);
+  corrQuality = zeros(nPredictables, 1);
   pranucQuality = zeros(nPredictables, 1);
   for target=1:nPredictables
     [dcQ, pranucQ] = testLinearModel(props, presence(:,target), ... 
 				   [sfFieldName(target) ' from '    modelType]);
-    dcQuality(target) = dcQ;
+    corrQuality(target) = dcQ;
     pranucQuality(target) = pranucQ;
   end
 end
 
 
-function props = getProsodicFeatureAverages(audir)
-  fssfile = 'h:/nigel/midlevel/flowtest/oneOfEach.fss'; 
+%% a t-statistic might be more logical, but always comes out massively signficant
+function showSomeCorrelations(props, presence, featurespec)
+  fssfile = 'h:/nigel/midlevel/flowtest/oneOfEach.fss';  % risky to have this hardcoded
   featurespec = getfeaturespec(fssfile);
-  [means, stds] = getFileLevelProsody(audir, featurespec);
-  props = means;
-  props = [means stds];  % may do overfitting, but appears not to affect performance
-  fprintf('size(props) is %d, %d\n', size(props));
-end
 
-function showSomeCorrelations(props, presence)
-  %% may be better to do a t-statistic and delta of the means across present/absent
   corr = corrcoef(horzcat(props, presence));
   
   nPredictables = size(presence, 2);
@@ -81,29 +77,3 @@ function showSomeCorrelations(props, presence)
   fprintf('\n');
 end
 
-
-%% modified from getAudioMetadata
-function [means, stds] = getFileLevelProsody(audir, featurespec)
-  filespec = sprintf('%s/*au', audir);
-  aufiles = dir(filespec);
-  if (size(aufiles,1) == 0)
-    error('no au files in the specified directory, "%s"\n', audir);
-  end
-
-  nproperties = length(featurespec);
-  nfiles = length(aufiles);
-  means = zeros(nfiles, nproperties);
-  stds = zeros(nfiles, nproperties);
-  for filei = 1:nfiles   
-    file = aufiles(filei);
-    trackspec = makeTrackspec('l', file.name, [audir '/']);
-    [~, monster] =  makeTrackMonster(trackspec, featurespec);
-    means(filei, :) = mean(monster);
-    stds(filei, :) = std(monster);
-  end
-end
-
-
-
-
-  
