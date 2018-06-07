@@ -20,14 +20,14 @@ function sfdriver(audir, andir)
 
   metaDataProps = getAudioMetadata(audir);
   sfCorrelationsPlus(metaDataProps, presence);
-  [mcq, mpq] = testPredictability(metaDataProps, presence, 'metadata');   
+  [mcq, mpq] = testPredictability(metaDataProps, presence, 'metadata', andir);   
 
   pfaProps = getProsodicFeatureAverages(audir);
   showSomeCorrelations(pfaProps, presence);
-  [acq, apq] = testPredictability(pfaProps, presence, 'pros.f.avgs');   
+  [acq, apq] = testPredictability(pfaProps, presence, 'pros.f.avgs', andir);   
 
   allProps = [metaDataProps pfaProps]; 
-  [bcq, bpq] = testPredictability(allProps, presence, 'both sets');   
+  [bcq, bpq] = testPredictability(allProps, presence, 'both sets', andir);   
 
   fprintf('              ---correlation---    -----pranuc-----\n');
   fprintf('                meta  pfa  both    meta  pfa  both\n');
@@ -40,16 +40,30 @@ function sfdriver(audir, andir)
 end
 
 
-function [corrQuality, pranucQuality] = testPredictability(props, presence, modelType)
+function [corrQuality, pranucQuality] = testPredictability(props, presence, modelType, andir)
   nPredictables = size(presence, 2);
   corrQuality = zeros(nPredictables, 1);
   pranucQuality = zeros(nPredictables, 1);
+  warning('off', 'stats:LinearModel:RankDefDesignMat')
   for target=1:nPredictables
-    [dcQ, pranucQ] = testLinearModel(props, presence(:,target), ... 
+    targetColumn = presence(:,target);
+
+    [dcQ, pranucQ] = testLinearModel(props, targetColumn, ... 
 				   [sfFieldName(target) ' from '    modelType]);
     corrQuality(target) = dcQ;
     pranucQuality(target) = pranucQ;
+
+    model = fitlm(props, targetColumn);
+    preds = predict(model, props);
+    [wfa, wm] = findWorstPreds(preds, targetColumn);
+    filespec = sprintf('%s/*txt', andir);
+    files = dir(filespec);
+    worstFA = files(wfa);
+    worstMiss = files(wm);
+    fprintf('for target %s, wfa is %d %s; wm is %d %s\n', ...
+	    sfFieldName(target), wfa, worstFA.name, wm, worstMiss.name);
   end
+  warning('on', 'stats:LinearModel:RankDefDesignMat')
 end
 
 
@@ -76,4 +90,5 @@ function showSomeCorrelations(props, presence, featurespec)
   end
   fprintf('\n');
 end
+
 

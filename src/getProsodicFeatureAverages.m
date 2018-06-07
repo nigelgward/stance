@@ -8,7 +8,6 @@ function props = getProsodicFeatureAverages(audir)
 end
 
 
-
 %% modified from getAudioMetadata
 function [means, stds] = getFileLevelProsody(audir, featurespec)
   filespec = sprintf('%s/*au', audir);
@@ -25,6 +24,8 @@ function [means, stds] = getFileLevelProsody(audir, featurespec)
     file = aufiles(filei);
     trackspec = makeTrackspec('l', file.name, [audir '/']);
     [~, monster] =  makeTrackMonster(trackspec, featurespec);
+  % leadInLength = min(700, size(monster, 1));
+  %  monster = monster(1:leadInLength,:);  
     means(filei, :) = mean(monster);
     stds(filei, :) = std(monster);
   end

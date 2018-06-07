@@ -11,15 +11,17 @@
 
 function sfMultiDriver()
  
-  langNames = containers.Map({1,2}, {'englishE50', 'bengali17'}); % for small testing
   langNames = containers.Map({1,2}, {'mini-english', 'englishE50'}); % for small testing
-  %% for best-case-testing; should match results of sfdriver
-  langNames = containers.Map({1,2}, {'mini-english', 'mini-bengali'}); % for tiny testing
-  langNames = containers.Map({1,2}, {'mini-english', 'mini-english'}); 
+  %% best-case-testing; matches results of sfdriver
   langNames = containers.Map({1,2}, {'englishE50', 'englishE50'}); 
+  langNames = containers.Map({1,2}, {'zuluE93', 'mini-english'}); 
+  langNames = containers.Map({1,2}, {'mini-english', 'mini-english'}); % for tiny testing
   langNames = containers.Map(...
       {1,2,3,4,5,6}, ...
       {'zuluE93', 'thaiE90', 'tagalogE89', 'englishE50', 'bengali17', 'indonesianE91'});
+
+  langNames = containers.Map({1,2}, {'englishE50', 'bengali17'}); % for small testing
+  langNames = containers.Map({1,2}, {'mini-english', 'mini-bengali'}); % for tiny testing
 
   nlanguages = length(langNames);
 
@@ -33,6 +35,7 @@ function sfMultiDriver()
     [trainX1, trainX2, trainX3, trainY] = buildSets(trainingLanguages, langNames);
     fprintf('building sets for test\n');
     [testX1, testX2, testX3, testY] = buildSets(heldout, langNames);
+    [trainX4, testX4, trainY4, testY4] = eightyTwentySameLang(trainX3, trainY);
 
     nPredictees = size(trainY,2);
     for predictee=1:nPredictees 
@@ -41,41 +44,64 @@ function sfMultiDriver()
       warning('off', 'stats:LinearModel:RankDefDesignMat');  % useful for preliminary test on tiny datasets
       model1 = fitlm(trainX1, trainY(:,predictee));
       preds1 = predict(model1, testX1);
-      [~, pranuc, ~] = niceStats(preds1, trainY(:,predictee), ...
+      [~, pranuc, ~] = niceStats(preds1, testY(:,predictee), ...
 				 [langNames(heldout) ' ' sfFieldName(predictee)]);
       pranucs1(heldout, predictee) = pranuc;
             
-      %% Model 2 is metada + prosodic feature averages
+      %% Model 2 is metadata + prosodic feature averages
       model2 = fitlm(trainX2, trainY(:,predictee));
-      warning('on', 'stats:LinearModel:RankDefDesignMat');  
       preds2 = predict(model2, testX2);
-      [~, pranuc, ~] = niceStats(preds2, trainY(:,predictee), ...
+      [~, pranuc, ~] = niceStats(preds2, testY(:,predictee), ...
 				 [langNames(heldout) ' ' sfFieldName(predictee)]);
       pranucs2(heldout, predictee) = pranuc;
 
-      %% Model 3 is metada + prosodic feature averages and standard deviations 
+      %% Model 3 is metadata + prosodic feature averages and standard deviations 
       model3 = fitlm(trainX3, trainY(:,predictee));
-      warning('on', 'stats:LinearModel:RankDefDesignMat');  
       preds3 = predict(model3, testX3);
-      [~, pranuc, ~] = niceStats(preds3, trainY(:,predictee), ...
+      [~, pranuc, ~] = niceStats(preds3, testY(:,predictee), ...
 				 [langNames(heldout) ' ' sfFieldName(predictee)]);
       pranucs3(heldout, predictee) = pranuc;
+
+      %% Model 4 is ditto, but trained on the first 80%, tested on last 20%
+      model4 = fitlm(trainX4, trainY4(:,predictee));
+      preds4 = predict(model4, testX4);
+      [~, pranuc4, ~] = niceStats(preds4, testY4(:,predictee), ...
+				 [langNames(heldout) ' ' sfFieldName(predictee)]);
+      pranucs4(heldout, predictee) = pranuc4;
+
+      warning('on', 'stats:LinearModel:RankDefDesignMat');  
     end
   end
 
   fprintf('leave-one-out average across %d languages:\n', nlanguages);
-  fprintf(' avg pranucs with:  metadata, ditto+pfmeans, ditto + pfstds\n');
+  fprintf(' avg auc with:  metadata, ditto+pfmeans, ditto + pfstds, ditto 80-20 same lang\n');
   for fieldID = 1:nPredictees
-    fprintf('   %13s    %.2f  %.2f  %.2f\n', ...
-	    sfFieldName(fieldID), mean(pranucs1(:,fieldID)), mean(pranucs2(:,fieldID)), mean(pranucs3(:,fieldID)));
+    p4 = pranucs4(:,fieldID)
+    p4noNaN = p4(~isnan(p4))
+    fprintf('   %13s    %.2f  %.2f  %.2f  %.2f\n', ...
+	    sfFieldName(fieldID), mean(pranucs1(:,fieldID)), mean(pranucs2(:,fieldID)), mean(pranucs3(:,fieldID)), mean(p4noNaN));
   end
-  fprintf('   %13s    %.2f  %.2f  %.2f \n', 'AVERAGES', ...
-	  mean(mean(pranucs1)), mean(mean(pranucs2)), mean(mean(pranucs3)));
 
-  fprintf('\nPerformance on  predicting gravity\n');
+  p4 = reshape(pranucs4, 1, [])
+  p4noNaN = p4(~isnan(p4))
+  fprintf('   %13s    %.3f  %.3f  %.3f  %.3f \n', 'AVERAGES', ...
+	  mean(mean(pranucs1)), mean(mean(pranucs2)), mean(mean(pranucs3)), mean(p4noNaN));
+
+  fprintf('average performance per language, using meta, ditto+pfmeans, ditto+pfstds, 80-20\n');
   for lang = 1:nlanguages
-    fprintf('%10s %.2f  %.2f  %.2f\n', langNames(lang), pranucs1(lang, 6), pranucs2(lang, 6), pranucs3(lang, 6));
+    p4 = pranucs4(lang, :)
+    p4noNaN = p4(~isnan(p4))
+    fprintf('%13s %.3f  %.3f  %.3f  %.3f\n', ...
+	    langNames(lang), mean(pranucs1(lang, :)), mean(pranucs2(lang, :)), mean(pranucs3(lang, :)), mean(p4noNaN));
   end
+  
+  fprintf('\nPerformance on predicting gravity\n');
+  for lang = 1:nlanguages
+    p4g = (pranucs4(lang,6))
+    p4gnoNaN = p4g(~isnan(p4g))
+    fprintf('%13s %.2f  %.2f  %.2f\n', langNames(lang), pranucs1(lang, 6), pranucs2(lang, 6), pranucs3(lang, 6));
+  end
+  fprintf('     AVERAGES  %.3f  %.3f  %.3f  %.3f\n', mean(pranucs1(:, 6)), mean(pranucs2(:, 6)), mean(pranucs3(lang, 6)), mean(p4gnoNaN));
 end
 
 
@@ -109,7 +135,7 @@ function[setX1, setX2, setX3, setY] =  buildSets(trainingLangIDs, langNames)
 end
 
 
-%% cache for future reuse, to prevent heavy, repetetive computation and file i/o
+%% cache for future reuse, to prevent heavy, repetitive computation and file i/o
 function pfa = findPFaverages(audir)
   persistent PFAcache;
   persistent nEntries;
@@ -133,4 +159,12 @@ function pfa = findPFaverages(audir)
   PFAcache(nEntries).dir = audir;
 end
 
-  
+
+function [trainX4, testX4, trainY4, testY4] = eightyTwentySameLang(trainX3, trainY);
+  nstories = size(trainX3, 1);
+  splitpoint = floor(nstories * 0.80);
+  trainX4 = trainX3(1:splitpoint,:);
+  testX4  = trainX3(splitpoint:end,:);
+  trainY4 = trainY(1:splitpoint,:);
+  testY4 = trainY(splitpoint:end, :);
+end 
