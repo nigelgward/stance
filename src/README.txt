@@ -100,6 +100,20 @@ Things to Do:
 
 - clean up English corpus following English/to-reprocess/Readme [2] (NW - September)
 
+June 2018
+
+- revived the code and adapted it to do situation frame inference.
+- top-level functions are sfdriver and sfMultidriver
+- these both assume that each corpora, once downloaded from LDC, is converted
+  and reorganized with
+    mkdir aufiles
+    cp ???/AUDIO/*flac aufiles
+    mkdir anfiles
+    cp ???/ANN*/*txt anfiles
+    cd aufiles
+    bash stance/src/flac2audio.sh
+    rm *flac
+
 
 
 

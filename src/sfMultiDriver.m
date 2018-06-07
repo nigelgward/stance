@@ -13,15 +13,17 @@ function sfMultiDriver()
  
   langNames = containers.Map({1,2}, {'mini-english', 'englishE50'}); % for small testing
   %% best-case-testing; matches results of sfdriver
-  langNames = containers.Map({1,2}, {'englishE50', 'englishE50'}); 
   langNames = containers.Map({1,2}, {'zuluE93', 'mini-english'}); 
+  langNames = containers.Map({1,2}, {'englishE50', 'bengali17'}); % for small testing
+  langNames = containers.Map({1,2}, {'mini-english', 'mini-bengali'}); % for tiny testing
   langNames = containers.Map({1,2}, {'mini-english', 'mini-english'}); % for tiny testing
+  langNames = containers.Map({1,2}, {'englishE50', 'englishE50'});
+  langNames = containers.Map({1,2}, {'bengali17', 'bengali17'});
+  langNames = containers.Map({1,2}, {'indonesianE91', 'indonesianE91'}); 
   langNames = containers.Map(...
       {1,2,3,4,5,6}, ...
       {'zuluE93', 'thaiE90', 'tagalogE89', 'englishE50', 'bengali17', 'indonesianE91'});
 
-  langNames = containers.Map({1,2}, {'englishE50', 'bengali17'}); % for small testing
-  langNames = containers.Map({1,2}, {'mini-english', 'mini-bengali'}); % for tiny testing
 
   nlanguages = length(langNames);
 
@@ -76,29 +78,29 @@ function sfMultiDriver()
   fprintf('leave-one-out average across %d languages:\n', nlanguages);
   fprintf(' avg auc with:  metadata, ditto+pfmeans, ditto + pfstds, ditto 80-20 same lang\n');
   for fieldID = 1:nPredictees
-    p4 = pranucs4(:,fieldID)
-    p4noNaN = p4(~isnan(p4))
+    p4 = pranucs4(:,fieldID);
+    p4noNaN = p4(~isnan(p4));
     fprintf('   %13s    %.2f  %.2f  %.2f  %.2f\n', ...
 	    sfFieldName(fieldID), mean(pranucs1(:,fieldID)), mean(pranucs2(:,fieldID)), mean(pranucs3(:,fieldID)), mean(p4noNaN));
   end
 
-  p4 = reshape(pranucs4, 1, [])
-  p4noNaN = p4(~isnan(p4))
+  p4 = reshape(pranucs4, 1, []);
+  p4noNaN = p4(~isnan(p4));
   fprintf('   %13s    %.3f  %.3f  %.3f  %.3f \n', 'AVERAGES', ...
 	  mean(mean(pranucs1)), mean(mean(pranucs2)), mean(mean(pranucs3)), mean(p4noNaN));
 
   fprintf('average performance per language, using meta, ditto+pfmeans, ditto+pfstds, 80-20\n');
   for lang = 1:nlanguages
-    p4 = pranucs4(lang, :)
-    p4noNaN = p4(~isnan(p4))
+    p4 = pranucs4(lang, :);
+    p4noNaN = p4(~isnan(p4));
     fprintf('%13s %.3f  %.3f  %.3f  %.3f\n', ...
 	    langNames(lang), mean(pranucs1(lang, :)), mean(pranucs2(lang, :)), mean(pranucs3(lang, :)), mean(p4noNaN));
   end
   
   fprintf('\nPerformance on predicting gravity\n');
   for lang = 1:nlanguages
-    p4g = (pranucs4(lang,6))
-    p4gnoNaN = p4g(~isnan(p4g))
+    p4g = (pranucs4(lang,6));
+    p4gnoNaN = p4g(~isnan(p4g));
     fprintf('%13s %.2f  %.2f  %.2f\n', langNames(lang), pranucs1(lang, 6), pranucs2(lang, 6), pranucs3(lang, 6));
   end
   fprintf('     AVERAGES  %.3f  %.3f  %.3f  %.3f\n', mean(pranucs1(:, 6)), mean(pranucs2(:, 6)), mean(pranucs3(lang, 6)), mean(p4gnoNaN));
@@ -114,7 +116,7 @@ function[setX1, setX2, setX3, setY] =  buildSets(trainingLangIDs, langNames)
   instancesSoFar = 0;
   for i=1:length(trainingLangIDs)
     lang = trainingLangIDs(i);
-    fprintf('   buildSets: now processing %s\n', langNames(lang));
+    fprintf('   buildSets for %s, ', langNames(lang));
     audir = ['h:/nigel/lorelei/ldc-from/' langNames(lang) '/aufiles'];
     andir = ['h:/nigel/lorelei/ldc-from/' langNames(lang) '/anfiles'];
     thisLangX1 = getAudioMetadata(audir);   
@@ -132,6 +134,7 @@ function[setX1, setX2, setX3, setY] =  buildSets(trainingLangIDs, langNames)
     setY(instancesSoFar+1:instancesSoFar+instancesForLang,:) = thisLangY;
     instancesSoFar = instancesSoFar+instancesForLang;
   end
+  fprintf('\n');
 end
 
 
