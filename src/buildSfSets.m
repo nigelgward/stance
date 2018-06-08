@@ -11,8 +11,9 @@ function[setX1, setX2, setX3, setY] =  buildSfSets(langIDs, langNames, getTruth)
   for i=1:length(langIDs)
     langID = langIDs(i);
     fprintf('   buildSets for %s, ', langNames(langID));
-    audir = ['h:/nigel/lorelei/ldc-from/' langNames(langID) '/aufiles'];
-    andir = ['h:/nigel/lorelei/ldc-from/' langNames(langID) '/anfiles'];
+    baseDir = 'h:/nigel/lorelei/ldc-from/'; 
+    audir = [baseDir langNames(langID) '/aufiles'];
+    andir = [baseDir langNames(langID) '/anfiles'];
     thisLangX1 = getAudioMetadata(audir);   
     
     pfAvgsStds = findPFaverages(audir);
@@ -55,7 +56,7 @@ function pfa = findPFaverages(audir)
     end
   end
 
-  pfa = getProsodicFeatureAvgsStds(audir);
+  pfa = getProsodicFeatureAvgStds(audir);
   nEntries = nEntries + 1;
   PFAcache(nEntries).values = pfa;
   PFAcache(nEntries).dir = audir;

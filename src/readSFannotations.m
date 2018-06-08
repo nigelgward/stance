@@ -1,6 +1,6 @@
 % Nigel Ward, April 2018 
 
-%% nigel/sframes/readSFannotations.m
+%% nigel/stance/src/readSFannotations.m
 
 %% Input: annoDir: directory containing all annotation file
 %%  presumably having been moved there from LDC's deep file structure
@@ -79,6 +79,7 @@ function [presence, propNames] = readSFannotations(annoDir)
 
       if fieldID < 99
 	fieldSeen(fieldID) = 1;
+	%% else a warning message will already have been written
       end
       [presence, locCount, typeCount] = recordPresence(filei, fieldID, ...
 	       thisline, lineCells, file.name, presence, locCount, typeCount,nNonTypeFields); 
@@ -103,9 +104,10 @@ function [presence, locCount, typeCount] = recordPresence(filei, fieldID, lineSt
   %% different corpora have different sets of annotation options;
   %%  for now, just handle what's there for the English corpus
   statusMapping = containers.Map( ...
-      {'Current', 'Future', 'Past', 'n/a'}, ...
+      {'Current', 'Future', 'Past', 'n/a'}, ...  
       [1, 0, 0, 0]);
-      %%      {1, .2, .1, 0} );
+  %%      {1, .2, .1, 0} );
+  %% this also works for "Past Only" since we split on whitespace
   reliefMapping = containers.Map( ...
       {'n/a', 'Insufficient/Unknown', 'No_Known_Resolution', 'Sufficient'}, ...
       {1, 1, 1, 0} );
@@ -144,7 +146,6 @@ function [presence, locCount, typeCount] = recordPresence(filei, fieldID, lineSt
       else 
 	presence(filei, fieldID) = 1;  
 	nLocations = 1 + length(strfind(lineString, ','));
-	
 	locCount(filei) = nLocations;   
       end
     case 5                % situation type 

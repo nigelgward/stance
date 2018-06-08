@@ -17,7 +17,7 @@ function data = getAudioMetadata(audir)
     filesize = file.bytes;
     broadcastID = str2num(file.name(10:12)); % a three-digit number like 001
     locInBroadcast = str2num(file.name(14:16)); % a three-digit number like 001
-    data(filei, 1) = broadcastID;  
+    data(filei, 1) = broadcastID;    % has little or no value
     data(filei, 2) = log(locInBroadcast);  % using log seems usually slightly better
     data(filei, 3) = log(filesize);    % using log better for urgency+, for English
   end

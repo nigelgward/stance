@@ -9,10 +9,6 @@
 %% those statistics were generated using sfMultiDriver.m
 
 function sfPredict()
-    trainLangDirs = containers.Map(...
-      {1,2,3,4,5,6}, ...
-      {'zuluE93', 'thaiE90', 'tagalogE89', 'englishE50', 'bengali17', 'indonesianE91'});
-
     %% tiny test
     trainLangDirs = containers.Map([1], 'mini-bengali');
     testLangDirs = containers.Map([1], 'mini-english');
@@ -22,10 +18,16 @@ function sfPredict()
     %% new-language test 
     trainLangDirs = containers.Map([1], 'mini-english');
     testLangDirs = containers.Map([1], 'mandarinE115');
+    %% real-scale test
+    trainLangDirs = containers.Map(...
+      {1,2,3,4,5,6}, ...
+      {'zuluE93', 'thaiE90', 'tagalogE89', 'englishE50', 'bengali17', 'indonesianE91'});
+    testLangDirs = containers.Map([1], 'mandarinE115');
 
 
-    [~, ~, trainX, trainY] = buildSfSets(1:length(trainLangDirs), trainLangDirs, true);
     [~, ~, testX, ~] = buildSfSets([1], testLangDirs, false);
+    %% the next line takes around 35 minutes.  Could precompute if desired.
+    [~, ~, trainX, trainY] = buildSfSets(1:length(trainLangDirs), trainLangDirs, true);
     nPredictees = size(trainY,2);
     results = zeros(size(testX, 1),nPredictees);
     for predictee=1:nPredictees 
@@ -71,7 +73,7 @@ function writeSfJson(results, testLangDir)
       ansObj.Status = 'current';
       ansObj.Confidence = hotness(doc, type);
       ansObj.Urgent = true;
-      ansObj.Justification_ID = 'dummy justification';
+      ansObj.Justification_ID = 'dummyValue';
       answerObjects{acounter} = ansObj;
       acounter = acounter + 1;  
     end
