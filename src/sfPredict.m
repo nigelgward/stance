@@ -12,6 +12,7 @@ function sfPredict()
     %% tiny test
     trainLangDirs = containers.Map([1], 'mini-bengali');
     testLangDirs = containers.Map([1], 'mini-english');
+
     %% small-scale test
     trainLangDirs = containers.Map([1], 'englishE50');
     testLangDirs = containers.Map([1], 'englishE50');
@@ -23,7 +24,6 @@ function sfPredict()
       {1,2,3,4,5,6}, ...
       {'zuluE93', 'thaiE90', 'tagalogE89', 'englishE50', 'bengali17', 'indonesianE91'});
     testLangDirs = containers.Map([1], 'mandarinE115');
-
 
     [~, ~, testX, ~] = buildSfSets([1], testLangDirs, false);
     %% the next line takes around 35 minutes.  Could precompute if desired.
@@ -66,13 +66,18 @@ function writeSfJson(results, testLangDir)
       if hotness(doc, type) < threshold
 	continue
       end
-      ansObj.DocumentID = filenames(doc);
+      filename = filenames(doc);
+      ansObj.Status = 'current';
+      ansObj.DocumentID = filename{1};
       ansObj.Type = typeStdNames(type);
       ansObj.Place_KB_ID = '';
-      ansObj.Resolution = 'insufficient';
-      ansObj.Status = 'current';
       ansObj.Confidence = hotness(doc, type);
+      ansObj.Resolution = 'insufficient';
       ansObj.Urgent = true;
+      if type >= 9  % it's not a need type, so we can't write these fields 
+	ansObj = rmfield(ansObj, 'Resolution');
+	ansObj = rmfield(ansObj, 'Urgent');
+      end
       ansObj.Justification_ID = 'dummyValue';
       answerObjects{acounter} = ansObj;
       acounter = acounter + 1;  
