@@ -5,7 +5,7 @@
 %% 1. which prosody-based model is best
 %% 2. how well we perform on all tasks, in order to tell our partners
 %%   both for the metadata-only predictors and the plus-prosody-summary-stats predictors
-%%  a. a table of pranuc values, averaged across all languages
+%%  a. a table of auc or pranuc values, averaged across all languages
 %%  b. for gravity, a table of ditto, for each language 
 %% This is for 6 languages, 17 predictees, 3 models
 
@@ -16,13 +16,13 @@ function sfMultiDriver()
   langNames = containers.Map({1,2}, {'zuluE93', 'mini-english'}); 
   langNames = containers.Map({1,2}, {'englishE50', 'bengali17'}); % for small testing
   langNames = containers.Map({1,2}, {'mini-english', 'mini-bengali'}); % for tiny testing
-  langNames = containers.Map({1,2}, {'mini-english', 'mini-english'}); % for tiny testing
   langNames = containers.Map({1,2}, {'englishE50', 'englishE50'});
   langNames = containers.Map({1,2}, {'bengali17', 'bengali17'});
   langNames = containers.Map({1,2}, {'indonesianE91', 'indonesianE91'}); 
   langNames = containers.Map(...
       {1,2,3,4,5,6}, ...
       {'zuluE93', 'thaiE90', 'tagalogE89', 'englishE50', 'bengali17', 'indonesianE91'});
+  langNames = containers.Map({1,2}, {'mini-english', 'mini-english'}); % for tiny testing
 
 
   nlanguages = length(langNames);
@@ -31,12 +31,12 @@ function sfMultiDriver()
     fprintf('sfMultiDriver: predicting for %s\n', langNames(heldout));
 
     languageNums = 1:nlanguages;
-    trainingLanguages = languageNums;
-    trainingLanguages(heldout) = [];
+    trainingLangIDs = languageNums;
+    trainingLangIDs(heldout) = [];
     fprintf('building sets for training\n');
-    [trainX1, trainX2, trainX3, trainY] = buildSets(trainingLanguages, langNames);
+    [trainX1, trainX2, trainX3, trainY] = buildSfSets(trainingLangIDs, langNames, true);
     fprintf('building sets for test\n');
-    [testX1, testX2, testX3, testY] = buildSets(heldout, langNames);
+    [testX1, testX2, testX3, testY] = buildSfSets(heldout, langNames, true);
     [trainX4, testX4, trainY4, testY4] = eightyTwentySameLang(trainX3, trainY);
 
     nPredictees = size(trainY,2);
@@ -78,88 +78,38 @@ function sfMultiDriver()
   fprintf('leave-one-out average across %d languages:\n', nlanguages);
   fprintf(' avg auc with:  metadata, ditto+pfmeans, ditto + pfstds, ditto 80-20 same lang\n');
   for fieldID = 1:nPredictees
-    p4 = pranucs4(:,fieldID);
-    p4noNaN = p4(~isnan(p4));
     fprintf('   %13s    %.2f  %.2f  %.2f  %.2f\n', ...
-	    sfFieldName(fieldID), mean(pranucs1(:,fieldID)), mean(pranucs2(:,fieldID)), mean(pranucs3(:,fieldID)), mean(p4noNaN));
+	    sfFieldName(fieldID), mean(pranucs1(:,fieldID)), ...
+	    mean(pranucs2(:,fieldID)), mean(pranucs3(:,fieldID)), ...
+	    nonNanMean(pranucs4(:,fieldID)));
   end
 
-  p4 = reshape(pranucs4, 1, []);
-  p4noNaN = p4(~isnan(p4));
   fprintf('   %13s    %.3f  %.3f  %.3f  %.3f \n', 'AVERAGES', ...
-	  mean(mean(pranucs1)), mean(mean(pranucs2)), mean(mean(pranucs3)), mean(p4noNaN));
+	  mean(mean(pranucs1)), mean(mean(pranucs2)), mean(mean(pranucs3)), ...
+	  nonNanMean(pranucs4));
 
   fprintf('average performance per language, using meta, ditto+pfmeans, ditto+pfstds, 80-20\n');
   for lang = 1:nlanguages
-    p4 = pranucs4(lang, :);
-    p4noNaN = p4(~isnan(p4));
     fprintf('%13s %.3f  %.3f  %.3f  %.3f\n', ...
-	    langNames(lang), mean(pranucs1(lang, :)), mean(pranucs2(lang, :)), mean(pranucs3(lang, :)), mean(p4noNaN));
+	    langNames(lang), mean(pranucs1(lang, :)), mean(pranucs2(lang, :)), mean(pranucs3(lang, :)), nonNanMean(pranucs4(lang,:)));
   end
   
   fprintf('\nPerformance on predicting gravity\n');
   for lang = 1:nlanguages
-    p4g = (pranucs4(lang,6));
-    p4gnoNaN = p4g(~isnan(p4g));
-    fprintf('%13s %.2f  %.2f  %.2f\n', langNames(lang), pranucs1(lang, 6), pranucs2(lang, 6), pranucs3(lang, 6));
+    fprintf('%13s %.2f  %.2f  %.2f\n', langNames(lang), pranucs1(lang, 6), ...
+	    pranucs2(lang, 6), pranucs3(lang, 6), pranucs4(lang,6));
   end
-  fprintf('     AVERAGES  %.3f  %.3f  %.3f  %.3f\n', mean(pranucs1(:, 6)), mean(pranucs2(:, 6)), mean(pranucs3(lang, 6)), mean(p4gnoNaN));
+  fprintf('     AVERAGES  %.3f  %.3f  %.3f  %.3f\n', mean(pranucs1(:, 6)), ...
+	  mean(pranucs2(:, 6)), mean(pranucs3(lang, 6)), nonNanMean(pranucs4(:,6)));
 end
 
 
-function[setX1, setX2, setX3, setY] =  buildSets(trainingLangIDs, langNames)
-  naudios = 3;     % likely min number of audios
-  setX1 = zeros(naudios, 3);    % 3 predictors
-  setX2 = zeros(naudios, 16);   % 3+13 predictors
-  setX3 = zeros(naudios, 29);   % 3+13*2 predictors
-  setY = zeros(naudios, 17);    % 17 predictees
-  instancesSoFar = 0;
-  for i=1:length(trainingLangIDs)
-    lang = trainingLangIDs(i);
-    fprintf('   buildSets for %s, ', langNames(lang));
-    audir = ['h:/nigel/lorelei/ldc-from/' langNames(lang) '/aufiles'];
-    andir = ['h:/nigel/lorelei/ldc-from/' langNames(lang) '/anfiles'];
-    thisLangX1 = getAudioMetadata(audir);   
-    
-%%    thisLangX2 = getProsodicFeatureAverages(audir);
-    pfAvgsStds = findPFaverages(audir);
-    thisLangX2 = [thisLangX1 pfAvgsStds(:,1:13)]; 
 
-    thisLangX3 = [thisLangX1 pfAvgsStds];
-    thisLangY = readSFannotations(andir);
-    instancesForLang = size(thisLangX1,1);
-    setX1(instancesSoFar+1:instancesSoFar+instancesForLang,:) = thisLangX1;
-    setX2(instancesSoFar+1:instancesSoFar+instancesForLang,:) = thisLangX2;
-    setX3(instancesSoFar+1:instancesSoFar+instancesForLang,:) = thisLangX3;
-    setY(instancesSoFar+1:instancesSoFar+instancesForLang,:) = thisLangY;
-    instancesSoFar = instancesSoFar+instancesForLang;
-  end
-  fprintf('\n');
-end
-
-
-%% cache for future reuse, to prevent heavy, repetitive computation and file i/o
-function pfa = findPFaverages(audir)
-  persistent PFAcache;
-  persistent nEntries;
-
-  if length(PFAcache) == 0  % first call so initialize the cache
-    nEntries = 0;
-    PFAcache = struct('dir', {}, 'values', {});
-  end
-
-  for i = 1:nEntries
-    entry = PFAcache(i);
-    if strcmp(audir, entry.dir)
-      pfa = entry.values;
-      return
-    end
-  end
-
-  pfa = getProsodicFeatureAverages(audir);
-  nEntries = nEntries + 1;
-  PFAcache(nEntries).values = pfa;
-  PFAcache(nEntries).dir = audir;
+ 
+function result = nonNanMean(matrix)
+  reshaped = reshape(matrix, 1, []);
+  nonNan = reshaped(~isnan(reshaped));
+  result = mean(nonNan);
 end
 
 

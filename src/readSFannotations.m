@@ -21,9 +21,12 @@
 %% test with readSFannotations('annot-testdir');
 %% actually run with readSFannotations('../lorelei/ldc-from/englishE50/anfiles');
 
-%% This is intended to serve both statistics computation (called with driver2.m)
-%% and incorporation into the full stance workflow
-%%    (stance/src/prosprop.m, makePPM.m, predEval.m)
+%% This is intended to serve three purposes: statistics computation 
+%%   with sfdriver.m and sfMultiDriver.m
+%% incorporation into the Knn stance workflow
+%%    with stance/src/prosprop.m, makePPM.m, predEval.m
+%% and linear regression modeling
+%%    with sfPredict.m
 
 %% Sample Input File, from the English corpus (E50)
 %%   TYPE: Shelter, Evacuation
@@ -32,12 +35,6 @@
 %%   PLACE: Brian Head, Panguitch, Southern Utah, Panguitch Lake, Utah
 %%   URGENCY: Urgent
 %%
-
-%% Purposes of this code: 
-%% - compute statistics, including base rates 
-%%   and correlations between the various annotations
-%% - locate files meeting various criteria, for later listening to
-%% - later possible use in the actual workflow 
 
 %% Notes and Issues:
 %% 1. if TYPE is 'out-of-domain' all others are guaranteed to be 'n/a'

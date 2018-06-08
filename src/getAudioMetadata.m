@@ -1,3 +1,7 @@
+%% Nigel Ward, UTEP, June 2018
+%% audir is a flat director of au files with names like CHN_EVAL_001_001.au
+%% returns a matrix where rows are audio files
+%%  and the columns are broadcast ID, log(segmentID), and log(filesize)
   
 function data = getAudioMetadata(audir)
   filespec = sprintf('%s/*au', audir);
@@ -6,7 +10,7 @@ function data = getAudioMetadata(audir)
     error('no au files in the specified directory, "%s"\n', audir);
   end
   nfiles = length(aufiles);
-  nproperties = 2;  % for now, just file length and loc in broadcast
+  nproperties = 3;  
   data = zeros(nfiles, nproperties);
   for filei = 1:nfiles   
     file = aufiles(filei);

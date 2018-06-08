@@ -22,7 +22,7 @@ function sfdriver(audir, andir)
   sfCorrelationsPlus(metaDataProps, presence);
   [mcq, mpq] = testPredictability(metaDataProps, presence, 'metadata', andir);   
 
-  pfaProps = getProsodicFeatureAverages(audir);
+  pfaProps = getProsodicFeatureAvgsStds(audir);
   showSomeCorrelations(pfaProps, presence);
   [acq, apq] = testPredictability(pfaProps, presence, 'pros.f.avgs', andir);   
 

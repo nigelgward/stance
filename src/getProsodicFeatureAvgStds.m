@@ -1,10 +1,11 @@
-function props = getProsodicFeatureAverages(audir)
+%% Nigel Ward, April 2018 
+
+function props = getProsodicFeatureAvgStds(audir)
   fssfile = 'h:/nigel/midlevel/flowtest/oneOfEach.fss'; 
   featurespec = getfeaturespec(fssfile);
   [means, stds] = getFileLevelProsody(audir, featurespec);
   props = means;
-  props = [means stds];  % may be overfitting
-  fprintf('size(props) is %d, %d\n', size(props));
+  props = [means stds];  
 end
 
 
