@@ -82,7 +82,7 @@ function writeSfJson(results, testLangDir)
       answerObjects{acounter} = ansObj;
       acounter = acounter + 1;  
     end
-  end
+  end 
   
   savejson('', answerObjects, struct('FileName','submittable.json', ...
 				     'ParseLogical', 1, 'FloatFormat', '%.3g'));
