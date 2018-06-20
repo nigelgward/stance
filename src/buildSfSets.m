@@ -16,15 +16,24 @@ function[setX1, setX2, setX3, setY] =  buildSfSets(langIDs, langNames, getTruth)
     andir = [baseDir langNames(langID) '/anfiles'];
     thisLangX1 = getAudioMetadata(audir);   
     
-    pfAvgsStds = findPFaverages(audir);
+    fssfile = 'h:/nigel/midlevel/flowtest/oneOfEachTuned.fss'; 
+    fssfile = 'h:/nigel/midlevel/flowtest/oneOfEach.fss';
+    pfAvgsStds = findPFaverages(audir, fssfile);
     thisLangX2 = [thisLangX1 pfAvgsStds(:,1:13)]; 
 
     thisLangX3 = [thisLangX1 pfAvgsStds];
     if getTruth
       thisLangY = readSFannotations(andir);
+      %% these 5 lines are not useful for type prediction, but for everything else
+      inDomainIndices = find(thisLangY(:,5)==1);
+      thisLangY = thisLangY(inDomainIndices,:);  % temporary 
+      thisLangX1 = thisLangX1(inDomainIndices,:);  % temporary 
+      thisLangX2 = thisLangX2(inDomainIndices,:);  % temporary 
+      thisLangX3 = thisLangX3(inDomainIndices,:);  % temporary 
     else
       thisLangY = 0;
     end
+
     
     instancesForLang = size(thisLangX1,1);
     setX1(instancesSoFar+1:instancesSoFar+instancesForLang,:) = thisLangX1;
@@ -39,7 +48,7 @@ end
 
 
 %% cache for future reuse, to prevent heavy, repetitive computation and file i/o
-function pfa = findPFaverages(audir)
+function pfa = findPFaverages(audir, fssfile)
   persistent PFAcache;
   persistent nEntries;
 
@@ -56,7 +65,7 @@ function pfa = findPFaverages(audir)
     end
   end
 
-  pfa = getProsodicFeatureAvgStds(audir);
+  pfa = getProsodicFeatureAvgStds(audir, fssfile);
   nEntries = nEntries + 1;
   PFAcache(nEntries).values = pfa;
   PFAcache(nEntries).dir = audir;

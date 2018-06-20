@@ -1,7 +1,6 @@
 %% Nigel Ward, April 2018 
 
-function props = getProsodicFeatureAvgStds(audir)
-  fssfile = 'h:/nigel/midlevel/flowtest/oneOfEach.fss'; 
+function props = getProsodicFeatureAvgStds(audir, fssfile)
   featurespec = getfeaturespec(fssfile);
   [means, stds] = getFileLevelProsody(audir, featurespec);
   props = [means stds];  

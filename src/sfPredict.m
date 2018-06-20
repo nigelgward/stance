@@ -28,14 +28,31 @@ function sfPredict()
     [~, ~, testX, ~] = buildSfSets([1], testLangDirs, false);
     %% the next line takes around 35 minutes.  Could precompute if desired.
     [~, ~, trainX, trainY] = buildSfSets(1:length(trainLangDirs), trainLangDirs, true);
+
     nPredictees = size(trainY,2);
     results = zeros(size(testX, 1),nPredictees);
-    for predictee=1:nPredictees 
+
+    for predictee = 1:nPredictees
       model = fitlm(trainX, trainY(:, predictee));
       results(:, predictee) = predict(model, testX);
     end
+%    [slimTrainX, slimTrainY] = onlyInDomain(trainX, trainY);
+%    for predictee = [5, 7,8,9,10,11,12,13,14,15,16,17]  % type & each individual type
+%      model = fitlm(trainX, trainY(:, predictee));
+%      results(:, predictee) = predict(model, testX);
+%    end
+%    for predictee = [1,2,3,4, 6]
+%      slimModel = fitlm(slimTrainX, slimTrainY(:, predictee));
+%      results(:, predictee) = predict(slimModel, testX);
+%    end
     writeFieldLikelihoodsJson(results, testLangDirs(1));  % for partners
     writeSfJson(results, testLangDirs(1));   % for submission 
+end
+
+function [slimX, slimY] = onlyInDomain(X, Y)
+  inDomainIndices = find(Y(:,5)==1);
+  slimX = X(inDomainIndices,:);  
+  slimY = Y(inDomainIndices,:);
 end
 
 
@@ -76,7 +93,6 @@ function writeSfJson(results, testLangDir)
       ansObj.Urgent = true;
       if type >= 9  % it's not a need type, so we can't write these fields 
 	ansObj = rmfield(ansObj, 'Resolution');
-	ansObj = rmfield(ansObj, 'Urgent');
       end
       ansObj.Justification_ID = 'dummyValue';
       answerObjects{acounter} = ansObj;

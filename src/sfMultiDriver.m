@@ -15,15 +15,14 @@ function sfMultiDriver()
   %% best-case-testing; matches results of sfdriver
   langNames = containers.Map({1,2}, {'zuluE93', 'mini-english'}); 
   langNames = containers.Map({1,2}, {'englishE50', 'bengali17'}); % for small testing
-  langNames = containers.Map({1,2}, {'mini-english', 'mini-bengali'}); % for tiny testing
-  langNames = containers.Map({1,2}, {'englishE50', 'englishE50'});
   langNames = containers.Map({1,2}, {'bengali17', 'bengali17'});
   langNames = containers.Map({1,2}, {'indonesianE91', 'indonesianE91'}); 
+  langNames = containers.Map({1,2}, {'mini-english', 'mini-english'}); % for tiny testing
+  langNames = containers.Map({1,2}, {'englishE50', 'englishE50'});
+  langNames = containers.Map({1,2}, {'mini-english', 'mini-bengali'}); % for tiny testing
   langNames = containers.Map(...
       {1,2,3,4,5,6}, ...
       {'zuluE93', 'thaiE90', 'tagalogE89', 'englishE50', 'bengali17', 'indonesianE91'});
-  langNames = containers.Map({1,2}, {'mini-english', 'mini-english'}); % for tiny testing
-
 
   nlanguages = length(langNames);
 
@@ -37,7 +36,18 @@ function sfMultiDriver()
     [trainX1, trainX2, trainX3, trainY] = buildSfSets(trainingLangIDs, langNames, true);
     fprintf('building sets for test\n');
     [testX1, testX2, testX3, testY] = buildSfSets(heldout, langNames, true);
+
+    filename = ['saved-' langNames(heldout)]
+    X = testX3;
+    Y = testY;
+    save(filename, 'X', 'Y');
+
     [trainX4, testX4, trainY4, testY4] = eightyTwentySameLang(trainX3, trainY);
+
+    keepers = featuresToKeep(size(trainX3,2));     % pruning
+    trainX3 = trainX3(:,keepers);
+    testX3  = testX3(:,keepers);
+    %%featureSelection(trainX3, trainY, testX3, testY);
 
     nPredictees = size(trainY,2);
     for predictee=1:nPredictees 
@@ -64,7 +74,7 @@ function sfMultiDriver()
 				 [langNames(heldout) ' ' sfFieldName(predictee)]);
       pranucs3(heldout, predictee) = pranuc;
 
-      %% Model 4 is ditto, but trained on the first 80%, tested on last 20%
+      %% Model 4 is ditto, but trained on the first 80%, tested on last 20%, for comparison to Dita's
       model4 = fitlm(trainX4, trainY4(:,predictee));
       preds4 = predict(model4, testX4);
       [~, pranuc4, ~] = niceStats(preds4, testY4(:,predictee), ...
@@ -96,14 +106,12 @@ function sfMultiDriver()
   
   fprintf('\nPerformance on predicting gravity\n');
   for lang = 1:nlanguages
-    fprintf('%13s %.2f  %.2f  %.2f\n', langNames(lang), pranucs1(lang, 6), ...
+    fprintf('%13s %.2f  %.2f  %.2f %.2f \n', langNames(lang), pranucs1(lang, 6), ...
 	    pranucs2(lang, 6), pranucs3(lang, 6), pranucs4(lang,6));
   end
   fprintf('     AVERAGES  %.3f  %.3f  %.3f  %.3f\n', mean(pranucs1(:, 6)), ...
 	  mean(pranucs2(:, 6)), mean(pranucs3(lang, 6)), nonNanMean(pranucs4(:,6)));
 end
-
-
 
  
 function result = nonNanMean(matrix)
@@ -121,3 +129,34 @@ function [trainX4, testX4, trainY4, testY4] = eightyTwentySameLang(trainX3, trai
   trainY4 = trainY(1:splitpoint,:);
   testY4 = trainY(splitpoint:end, :);
 end 
+
+
+function featureSelection(trainAllX, trainAllY, testAllX, testAllY)
+  urgency = 3;
+  nfeats = size(trainAllX,2);
+  for leaveOut = 1:nfeats       % one by one, remove a feature
+    trainSubsetIndices = 1:nfeats;
+    trainSubsetIndices(leaveOut) = [];
+    trainX = trainAllX(:,trainSubsetIndices);
+    testX = testAllX(:,trainSubsetIndices);
+    trainY = trainAllY(:, urgency);
+    testY = testAllY(:, urgency);
+    model = fitlm(trainX, trainY);
+    preds = predict(model, testX);
+    [~, auc, ~] = niceStats(preds, testY, ' ');
+    fprintf('for urgency, leaving out %s, auc is %.2f\n', ...
+	    featurespec(leaveOut).featname, auc);
+  end
+end
+
+
+
+function keepers = featuresToKeep(nfeatures)
+  if nfeatures ~= 29
+    error('unexpected number of features');
+  end
+  %% avoiding feature 1 (broadcast id)
+  %% and those which are grossly inconsistent in correlation direction
+  %%  for urgency across languages
+  keepers = [2 3   7 8   10   13 14     18 19 20 21   25  28 29];
+end
