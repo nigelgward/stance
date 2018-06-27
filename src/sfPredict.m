@@ -33,6 +33,14 @@ function sfPredict()
     results = zeros(size(testX, 1),nPredictees);
 
     for predictee = 1:nPredictees
+      if predictee == 3 || predictee == 6  % urgency or gravity 
+	olacsSubset = 1 + [1 3 4 6 7 8 9 11 14 15 16 19 21 23 24 25 28]; % useful for urgency
+	actualTrainX = trainX(:, olacsSubset);
+	actualTestX = testX(:, olacsSubset);
+      else
+	actualTrainX = trainX;
+	actualTestX = testX;
+      end
       model = fitlm(trainX, trainY(:, predictee));
       results(:, predictee) = predict(model, testX);
     end
