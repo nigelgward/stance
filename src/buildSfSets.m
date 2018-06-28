@@ -25,11 +25,11 @@ function[setX1, setX2, setX3, setY] =  buildSfSets(langIDs, langNames, getTruth)
     if getTruth
       thisLangY = readSFannotations(andir);
       %% these 5 lines are not useful for type prediction, but for everything else
-      inDomainIndices = find(thisLangY(:,5)==1);
-      thisLangY = thisLangY(inDomainIndices,:);  % temporary 
-      thisLangX1 = thisLangX1(inDomainIndices,:);  % temporary 
-      thisLangX2 = thisLangX2(inDomainIndices,:);  % temporary 
-      thisLangX3 = thisLangX3(inDomainIndices,:);  % temporary 
+%      inDomainIndices = find(thisLangY(:,5)==1);
+%      thisLangY = thisLangY(inDomainIndices,:);  % temporary 
+%      thisLangX1 = thisLangX1(inDomainIndices,:);  % temporary 
+%      thisLangX2 = thisLangX2(inDomainIndices,:);  % temporary 
+%      thisLangX3 = thisLangX3(inDomainIndices,:);  % temporary 
     else
       thisLangY = 0;
     end

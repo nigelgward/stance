@@ -8,10 +8,10 @@
 %% which explains the methods used, and gives performance statistics
 %% those statistics were generated using sfMultiDriver.m
 
+%% need to addpath h:/nigel/lorelei/uyghur-sftype-december/jsonlab-1.2
+
 function sfPredict()
     %% tiny test
-    trainLangDirs = containers.Map([1], 'mini-bengali');
-    testLangDirs = containers.Map([1], 'mini-english');
 
     %% small-scale test
     trainLangDirs = containers.Map([1], 'englishE50');
@@ -25,6 +25,13 @@ function sfPredict()
       {'zuluE93', 'thaiE90', 'tagalogE89', 'englishE50', 'bengali17', 'indonesianE91'});
     testLangDirs = containers.Map([1], 'mandarinE115');
 
+    trainLangDirs = containers.Map([1], 'mini-english');
+    testLangDirs = containers.Map([1], 'mini-bengali');
+
+    trainLangDirs = containers.Map([1], 'englishE50');
+    testLangDirs = containers.Map([1], 'englishE50');
+
+
     [~, ~, testX, ~] = buildSfSets([1], testLangDirs, false);
     %% the next line takes around 35 minutes.  Could precompute if desired.
     [~, ~, trainX, trainY] = buildSfSets(1:length(trainLangDirs), trainLangDirs, true);
@@ -32,35 +39,45 @@ function sfPredict()
     nPredictees = size(trainY,2);
     results = zeros(size(testX, 1),nPredictees);
 
+    trainY
+
     for predictee = 1:nPredictees
       if predictee == 3 || predictee == 6  % urgency or gravity 
 	olacsSubset = 1 + [1 3 4 6 7 8 9 11 14 15 16 19 21 23 24 25 28]; % useful for urgency
-	actualTrainX = trainX(:, olacsSubset);
-	actualTestX = testX(:, olacsSubset);
+	subTrainX = trainX(:, olacsSubset);
+	subTestX = testX(:, olacsSubset);
       else
-	actualTrainX = trainX;
-	actualTestX = testX;
+	subTrainX = trainX;
+	subTestX = testX;
       end
-      model = fitlm(trainX, trainY(:, predictee));
-      results(:, predictee) = predict(model, testX);
+      model = fitlm(subTrainX, trainY(:, predictee));
+      results(:, predictee) = predict(model, subTestX);
     end
-%    [slimTrainX, slimTrainY] = onlyInDomain(trainX, trainY);
-%    for predictee = [5, 7,8,9,10,11,12,13,14,15,16,17]  % type & each individual type
-%      model = fitlm(trainX, trainY(:, predictee));
-%      results(:, predictee) = predict(model, testX);
-%    end
-%    for predictee = [1,2,3,4, 6]
-%      slimModel = fitlm(slimTrainX, slimTrainY(:, predictee));
-%      results(:, predictee) = predict(slimModel, testX);
-%    end
+
+    writeSuspectedUrgent(results, testLangDirs(1));
     writeFieldLikelihoodsJson(results, testLangDirs(1));  % for partners
     writeSfJson(results, testLangDirs(1));   % for submission 
 end
 
-function [slimX, slimY] = onlyInDomain(X, Y)
-  inDomainIndices = find(Y(:,5)==1);
-  slimX = X(inDomainIndices,:);  
-  slimY = Y(inDomainIndices,:);
+
+%% these will be a priority for labelers
+function writeSuspectedUrgent(results, testLangDir)
+  filenames = aufilenames(['h:/nigel/lorelei/ldc-from/' testLangDir '/aufiles']);
+  urgencyScores = results(:,3)';
+  [~, indices] = sort(results(:,3), 'descend');
+  writeMostUrgent(urgencyScores(indices), filenames(indices), testLangDir, 50);
+  writeMostUrgent(urgencyScores(indices), filenames(indices), testLangDir, 250);
+end
+
+
+function writeMostUrgent(scores, filenames, testLangDir, num)
+  filename = ['h:/nigel/lorelei/ldc-from/' testLangDir '/' sprintf('top%d.txt', num)];
+  fd = fopen(filename, 'w');
+  fprintf(fd, 'top %d suspected urgent\n', num);
+  for i = 1:min(num, length(scores))
+    fprintf(fd, ' %5.2f %s\n', scores(i), filenames{i});
+  end
+  fclose(fd);
 end
 
 
@@ -155,3 +172,12 @@ function filenames = aufilenames(audir)
 end
 
   
+%% because the other properties are not labled if indomain==0,
+%% it could be advantageous to remove such files from the training set
+%% when predicting urgency etc... but in practice, turns out not to be 
+function [slimX, slimY] = onlyInDomain(X, Y)
+  inDomainIndices = find(Y(:,5)==1);
+  slimX = X(inDomainIndices,:);  
+  slimY = Y(inDomainIndices,:);
+end
+
