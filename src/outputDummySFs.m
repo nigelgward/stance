@@ -1,7 +1,6 @@
-
-
 function outputDummySFs()
-  %% mostly as a test of the JSON format 
+  %% Nigel Ward, UTEP, May 2018
+  %% mostly as a test of the JSON format; see the UTEP submission description
   %% output about 100 frames
   %% all have current-urgent-insufficient
   %% all have location = nullstring or the top-level location
@@ -9,8 +8,7 @@ function outputDummySFs()
   %% all have documentID = dummy
   %% type varies
 
-
-  %% to run, addpath h:/nigel/lorelei/uyghur-sftype-december/jsonlab-1.2
+  addpath('h:/nigel/lorelei/uyghur-sftype-december/jsonlab-1.2');
 
   %% Customize these two based on the situation description
   typeCountDeltas = [0, -1, 0, 0, 0, 0, 0, 0, -9, -7, -6];  % for earthquake

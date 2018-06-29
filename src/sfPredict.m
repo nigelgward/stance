@@ -4,18 +4,18 @@
 
 %% the larger workflow is described in Readme.sf.txt
 
-%% see also "Lorelei July 2018 Situation-Frames Evaluation: UTEP’s Prosody-Based Approach: Plans and Performance Estimates" June 6, 2018, in lorelei/report-for-cmu.doc
+%% see also "Lorelei July 2018 Situation-Frames Evaluation:
+%%   UTEP’s Prosody-Based Approach: Plans and Performance Estimates" June 6, 2018,
+%%   in lorelei/report-for-cmu.doc
 %% which explains the methods used, and gives performance statistics
 %% those statistics were generated using sfMultiDriver.m
 
-%% need to addpath h:/nigel/lorelei/uyghur-sftype-december/jsonlab-1.2
+%% if showResults is true, then read the testset annotations and evaluate performance
+%% if false, then just write the results
 
-function sfPredict()
-    %% tiny test
-
+function sfPredict(showResults)
+  addpath('h:/nigel/lorelei/uyghur-sftype-december/jsonlab-1.2');
     %% small-scale test
-    trainLangDirs = containers.Map([1], 'englishE50');
-    testLangDirs = containers.Map([1], 'englishE50');
     %% new-language test 
     trainLangDirs = containers.Map([1], 'mini-english');
     testLangDirs = containers.Map([1], 'mandarinE115');
@@ -25,21 +25,27 @@ function sfPredict()
       {'zuluE93', 'thaiE90', 'tagalogE89', 'englishE50', 'bengali17', 'indonesianE91'});
     testLangDirs = containers.Map([1], 'mandarinE115');
 
+    %% tiny test
     trainLangDirs = containers.Map([1], 'mini-english');
     testLangDirs = containers.Map([1], 'mini-bengali');
 
     trainLangDirs = containers.Map([1], 'englishE50');
     testLangDirs = containers.Map([1], 'englishE50');
 
-
-    [~, ~, testX, ~] = buildSfSets([1], testLangDirs, false);
-    %% the next line takes around 35 minutes.  Could precompute if desired.
-    [~, ~, trainX, trainY] = buildSfSets(1:length(trainLangDirs), trainLangDirs, true);
+    [~, ~, testX, testY] = buildSfSets([1], testLangDirs, showResults);
+    trainingDataFile = 'h:/nigel/stance/src/sfTraining.mat';  %.mat 
+    if exist(trainingDataFile, 'file') == 2
+      fprintf('using cached %s\n', trainingDataFile);
+      load(trainingDataFile);
+    else
+      [~, ~, trainX, trainY] = buildSfSets(1:length(trainLangDirs), trainLangDirs, true);
+      trainX = trainX(1:5:end,:);
+      trainY = trainY(1:5:end,:);
+      save([trainingDataFile '-new'], 'trainX', 'trainY');
+    end   
 
     nPredictees = size(trainY,2);
     results = zeros(size(testX, 1),nPredictees);
-
-    trainY
 
     for predictee = 1:nPredictees
       if predictee == 3 || predictee == 6  % urgency or gravity 
@@ -51,7 +57,15 @@ function sfPredict()
 	subTestX = testX;
       end
       model = fitlm(subTrainX, trainY(:, predictee));
-      results(:, predictee) = predict(model, subTestX);
+      columnResults = predict(model, subTestX);
+      results(:, predictee) = columnResults;
+      if showResults
+	[~, auc, ~] = niceStats(columnResults, testY(:,predictee), sfFieldName(predictee));
+	fprintf('for predictee: %s auc is %.2f\n', sfFieldName(predictee), auc );
+	%%	for j = 1:size(columnResults, 1)
+	%%	  fprintf('file%02d: %.2f %.2f\n', j, columnResults(j), testY(j,predictee));
+	%%	end
+      end
     end
 
     writeSuspectedUrgent(results, testLangDirs(1));

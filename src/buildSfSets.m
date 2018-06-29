@@ -10,21 +10,19 @@ function[setX1, setX2, setX3, setY] =  buildSfSets(langIDs, langNames, getTruth)
   instancesSoFar = 0;
   for i=1:length(langIDs)
     langID = langIDs(i);
-    fprintf('   buildSets for %s, ', langNames(langID));
+    fprintf('   buildSets for %s ', langNames(langID));
     baseDir = 'h:/nigel/lorelei/ldc-from/'; 
     audir = [baseDir langNames(langID) '/aufiles'];
     andir = [baseDir langNames(langID) '/anfiles'];
     thisLangX1 = getAudioMetadata(audir);   
     
     fssfile = 'h:/nigel/midlevel/flowtest/oneOfEachTuned.fss'; 
-    fssfile = 'h:/nigel/midlevel/flowtest/oneOfEach.fss';
     pfAvgsStds = findPFaverages(audir, fssfile);
     thisLangX2 = [thisLangX1 pfAvgsStds(:,1:13)]; 
-
     thisLangX3 = [thisLangX1 pfAvgsStds];
     if getTruth
       thisLangY = readSFannotations(andir);
-      %% these 5 lines are not useful for type prediction, but for everything else
+      %% these 5 lines are not useful for type prediction, but possibly for everything else
 %      inDomainIndices = find(thisLangY(:,5)==1);
 %      thisLangY = thisLangY(inDomainIndices,:);  % temporary 
 %      thisLangX1 = thisLangX1(inDomainIndices,:);  % temporary 
