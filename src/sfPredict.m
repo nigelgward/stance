@@ -15,33 +15,33 @@
 
 function sfPredict(showResults)
   addpath('h:/nigel/lorelei/uyghur-sftype-december/jsonlab-1.2');
-    %% small-scale test
-    %% new-language test 
-    trainLangDirs = containers.Map([1], 'mini-english');
-    testLangDirs = containers.Map([1], 'mandarinE115');
-    %% real-scale test
-    trainLangDirs = containers.Map(...
-      {1,2,3,4,5,6}, ...
-      {'zuluE93', 'thaiE90', 'tagalogE89', 'englishE50', 'bengali17', 'indonesianE91'});
-    testLangDirs = containers.Map([1], 'mandarinE115');
-
-    %% tiny test
-    trainLangDirs = containers.Map([1], 'mini-english');
-    testLangDirs = containers.Map([1], 'mini-bengali');
-
-    trainLangDirs = containers.Map([1], 'englishE50');
-    testLangDirs = containers.Map([1], 'englishE50');
-
-    [~, ~, testX, testY] = buildSfSets([1], testLangDirs, showResults);
-    trainingDataFile = 'h:/nigel/stance/src/sfTraining.mat';  %.mat 
-    if exist(trainingDataFile, 'file') == 2
-      fprintf('using cached %s\n', trainingDataFile);
-      load(trainingDataFile);
-    else
-      [~, ~, trainX, trainY] = buildSfSets(1:length(trainLangDirs), trainLangDirs, true);
-      trainX = trainX(1:5:end,:);
-      trainY = trainY(1:5:end,:);
-      save([trainingDataFile '-new'], 'trainX', 'trainY');
+  %% small-scale test
+  %% new-language test 
+  trainLangDirs = containers.Map([1], 'mini-english');
+  testLangDirs = containers.Map([1], 'mandarinE115');
+  %% real-scale test
+  %% tiny test
+  trainLangDirs = containers.Map([1], 'mini-english');
+  testLangDirs = containers.Map([1], 'mini-bengali');
+  
+  trainLangDirs = containers.Map([1], 'englishE50');
+  testLangDirs = containers.Map([1], 'englishE50');
+  trainLangDirs = containers.Map(...
+	  {1,2,3,4,5,6}, ...
+	  {'zuluE93', 'thaiE90', 'tagalogE89', 'englishE50', 'bengali17', 'indonesianE91'});
+  testLangDirs = containers.Map([1], '../sinhala0');  % IL10
+    
+  [~, ~, testX, testY] = buildSfSets([1], testLangDirs, showResults);
+  trainingDataFile = 'h:/nigel/stance/src/sfTraining.mat';  %.mat 
+  if exist(trainingDataFile, 'file') == 2
+    fprintf('using cached %s\n', trainingDataFile);
+    load(trainingDataFile);
+    
+  else
+    [~, ~, trainX, trainY] = buildSfSets(1:length(trainLangDirs), trainLangDirs, true);
+    provenance = 'xxxx';
+      save([trainingDataFile '-new'], 'trainX', 'trainY', 'provenance');
+      %% to activate for subsequent use:  cp sfTraining.mat.new sfTraining.mat
     end   
 
     nPredictees = size(trainY,2);
